@@ -1,0 +1,90 @@
+{
+  "name": "ukmp",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "16"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "@google-cloud/text-to-speech": "^4.2.1",
+    "@material/card": "^14.0.0",
+    "@material/list": "^14.0.0",
+    "@material/mwc-button": "^0.27.0",
+    "@material/mwc-drawer": "^0.27.0",
+    "@material/mwc-fab": "^0.27.0",
+    "@material/mwc-icon": "^0.27.0",
+    "@material/mwc-icon-button": "^0.27.0",
+    "@material/mwc-slider": "^0.27.0",
+    "@material/mwc-tab": "^0.27.0",
+    "@material/mwc-tab-bar": "^0.27.0",
+    "@material/textfield": "^14.0.0",
+    "@material/top-app-bar": "^14.0.0",
+    "@npm-polymer/paper-toolbar": "^1.1.7",
+    "@polymer/app-route": "^3.0.2",
+    "@polymer/iron-flex-layout": "^3.0.1",
+    "@polymer/iron-icons": "^3.0.1",
+    "@polymer/iron-image": "^3.0.2",
+    "@polymer/iron-selector": "^3.0.1",
+    "@polymer/paper-header-panel": "^3.0.0-pre.16",
+    "@polymer/paper-item": "^3.0.1",
+    "@polymer/paper-listbox": "^3.0.1",
+    "@polymer/paper-material": "^3.0.1",
+    "@polymer/paper-menu": "^0.0.3",
+    "@polymer/paper-menu-button": "^3.1.0",
+    "@polymer/paper-slider": "^3.0.1",
+    "@polymer/paper-toolbar": "^3.0.1",
+    "@polymer/polymer": "^3.5.1",
+    "@webcomponents/shadycss": "^1.11.2",
+    "@webcomponents/webcomponentsjs": "^2.7.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "firebase": "^9.18.0",
+    "firebase-admin": "^11.5.0",
+    "firebase-functions": "^4.2.0",
+    "fs": "^0.0.1-security",
+    "heic-convert": "^1.2.4",
+    "heic2any": "^0.0.4",
+    "joi": "^17.8.4",
+    "jpeg-js": "^0.4.4",
+    "material-paper": "^0.0.8",
+    "node-vibrant": "^3.2.1-alpha.1",
+    "openpgp": "^5.7.0",
+    "path": "^0.12.7",
+    "polyfill-library": "^4.7.0",
+    "polyfills": "^2.1.1",
+    "polymer-cli": "^1.9.11",
+    "serve-favicon": "^2.5.0",
+    "socket.io": "^4.7.1",
+    "util": "^0.12.5",
+    "webcomponents-lite": "^0.6.0",
+    "workbox-sw": "^7.0.0",
+    "xss": "^1.0.14"
+  },
+  "devDependencies": {
+    "@hint/configuration-progressive-web-apps": "^7.0.26",
+    "firebase-functions-test": "^3.0.0",
+    "hint": "^7.1.8"
+  },
+  "private": true,
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UKMP/ukmp.github.io.git"
+  },
+  "keywords": [
+    "ukmp"
+  ],
+  "author": "Digital Departement",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/UKMP/ukmp.github.io/issues"
+  },
+  "homepage": "https://github.com/UKMP/ukmp.github.io#readme"
+}

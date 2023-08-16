@@ -1,0 +1,95 @@
+{
+  "hosting": {
+    "public": ".",
+    "cleanUrls": true,
+    "ignore": [
+      "firebase.json",
+      "**/.*"
+    ],
+    "appAssociation": "AUTO",
+    "rewrites": [
+      {
+        "source": "**",
+        "dynamicLinks": true,
+        "type": "rewrite"
+      }
+    ],
+    "redirects": [
+      {
+        "source": "/nr",
+        "destination": "https://ukmpapps.web.app/karya/nutriwarrior/",
+        "type": 301
+      },
+      {
+        "source": "/ab",
+        "destination": "https://ukmpapps.web.app/about/",
+        "type": 301
+      },
+      {
+        "source": "/kr",
+        "destination": "https://ukmpapps.web.app/karya/",
+        "type": 301
+      },
+      {
+        "source": "/ins",
+        "destination": "https://ukmpapps.web.app/karya/ians/",
+        "type": 301
+      },
+      {
+        "source": "/ig",
+        "destination": "https://www.instagram.com/ukmp_unnes/",
+        "type": 301
+      },
+      {
+        "source": "/fb",
+        "destination": "https://www.facebook.com/ukmpunnes/",
+        "type": 301
+      },
+      {
+        "source": "/tw",
+        "destination": "https://twitter.com/UKMP_UNNES",
+        "type": 301
+      },
+      {
+        "source": "/ms",
+        "destination": "https://ukmpapps.web.app/medsos/",
+        "type": 301
+      },
+      {
+        "source": "/su",
+        "destination": "https://ukmpapps.web.app/story/",
+        "type": 301
+      },
+      {
+        "source": "/tt",
+        "destination": "https://www.tiktok.com/@ukmp.unnes1",
+        "type": 301
+      },
+      {
+        "source": "/lt",
+        "destination": "https://linktr.ee/UKMPenelitianUNNES",
+        "type": 301
+      }
+    ],
+    "headers": [
+      {
+        "source": "/node_modules/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=300"
+          }
+        ]
+      },
+      {
+        "source": "/service-worker.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      }
+    ]
+  }
+}

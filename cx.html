@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Deteksi Gerakan</title>
+</head>
+
+<body>
+    <h1>Deteksi Gerakan</h1>
+    <p id="result">-</p>
+
+    <!-- Menambahkan skrip JavaScript -->
+    <script>
+        if (window.DeviceMotionEvent) {
+            window.addEventListener("devicemotion", (event) => {
+                const x = event.acceleration.x;
+                const y = event.acceleration.y;
+                const z = event.acceleration.z;
+
+                const speed = Math.sqrt(x ** 2 + y ** 2 + z ** 2);
+
+                const result = document.querySelector("#result");
+                if (speed > 30) {
+                    result.innerHTML = "Gerakan Terdeteksi!";
+
+                    if ("Notification" in window && navigator.serviceWorker) {
+                        Notification.requestPermission().then((permission) => {
+                            if (permission === "granted") {
+                                navigator.serviceWorker.register("sw.js").then(() => {
+                                    const notificationOptions = {
+                                        body: "Perangkat Anda mendeteksi gerakan yang cukup cepat.",
+                                        icon: "https://ukmpapps.web.app/logo/ukmp-logo-192x192.png",
+                                        actions: [
+                                            { action: "go-to-website", title: "Buka Website" }
+                                        ],
+                                        requireInteraction: true // menambahkan opsi requireInteraction
+                                    };
+
+                                    navigator.serviceWorker.ready.then((registration) => {
+                                        registration.showNotification("Gerakan Terdeteksi!", notificationOptions);
+                                    });
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+        } else {
+            alert("Akselerometer tidak didukung di perangkat Anda.");
+        }
+
+    </script>
+</body>
+
+</html>
