@@ -1,0 +1,11 @@
+{
+  "hosting": {
+      "target": "pearrd-rtc",
+      "public": "dist",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ]
+    }
+}

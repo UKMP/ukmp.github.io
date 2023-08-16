@@ -1,0 +1,32 @@
+{
+  "name": "pearrd",
+  "version": "1.0.0",
+  "description": "Pearrd is a peer-to-peer chat website.",
+  "repository": "github:Sammy-T/Pearmo",
+  "main": "index.js",
+  "scripts": {
+    "start": "hugo server -D -s site",
+    "dev": "npm run prebuild && run-p dev:**",
+    "dev:hugo": "hugo server -D -e development -s site --renderToDisk",
+    "dev:firebase": "firebase emulators:start",
+    "prebuild": "rimraf dist",
+    "build": "hugo -s site",
+    "build:preview": "npm run prebuild && hugo -D -e development -s site",
+    "deploy": "npm run build && firebase deploy"
+  },
+  "keywords": [],
+  "author": "Sammy Telusma",
+  "license": "MIT",
+  "devDependencies": {
+    "hugo-bin": "^0.80.0",
+    "npm-run-all": "^4.1.5",
+    "postcss": "^8.4.5",
+    "postcss-cli": "^9.1.0",
+    "postcss-import": "^14.0.2",
+    "rimraf": "^3.0.2"
+  },
+  "dependencies": {
+    "halfmoon": "^1.1.1",
+    "scroll-js": "^3.5.2"
+  }
+}

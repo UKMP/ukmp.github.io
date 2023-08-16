@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Gerakan Sensor</title>
+    <style>
+        #sensor {
+            width: 200px;
+            height: 200px;
+            background-color: gray;
+            border-radius: 50%;
+            margin: 50px auto;
+        }
+
+        #result {
+            font-size: 24px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Gerakan Sensor</h1>
+    <div id="sensor"></div>
+    <div id="result"></div>
+
+    <script>
+        // Memilih elemen sensor
+        const sensor = document.querySelector("#sensor");
+
+        // Menginisialisasi akselerometer
+        if (window.DeviceMotionEvent) {
+            window.addEventListener(
+                "devicemotion",
+                (event) => {
+                    // Mendapatkan data akselerometer
+                    const x = event.acceleration.x;
+                    const y = event.acceleration.y;
+                    const z = event.acceleration.z;
+
+                    // Menghitung kecepatan total
+                    const speed = Math.sqrt(x ** 2 + y ** 2 + z ** 2);
+
+                    // Menampilkan hasil
+                    const result = document.querySelector("#result");
+                    if (speed > 30) {
+                        result.innerHTML = "Gerakan Terdeteksi!";
+                    }
+                },
+                true
+            );
+        } else {
+            alert("Akselerometer tidak didukung di perangkat Anda.");
+        }
+    </script>
+</body>
+
+</html>
