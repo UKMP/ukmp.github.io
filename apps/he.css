@@ -1,0 +1,433 @@
+* {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+
+  .skeleton {
+    animation: skeleton-loading 1s infinite ease-in-out;
+    background: linear-gradient(-90deg, #000000 0%, #f2f2f2 50%, #000000 100%);
+    background-size: 200% 100%;
+    animation-direction: alternate;
+  }
+
+  @keyframes skeleton-loading {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    margin-top: 35px;
+    background-color: #f2f2f2;
+  }
+
+  ukmp-text.login {
+    font-size: 30px;
+    color: white;
+  }
+
+  .input {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+    width: 100%;
+    font-size: 30px;
+  }
+
+  label {
+    margin-bottom: 8px;
+    color: black;
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #dddddd;
+    outline: none;
+    width: 100%;
+    height: 45px;
+  }
+
+  .button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 100px;
+    color: #ffffff;
+    background-color: black;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    height: 60px;
+    font-size: 35px;
+  }
+
+  .button:hover {
+    color: black;
+    background-color: #3b3b3b;
+  }
+
+  .link {
+    margin-top: 8px;
+    text-align: center;
+    width: 100%;
+    height: 60px;
+    font-size: 35px;
+  }
+
+  .link a {
+    color: black;
+    text-decoration: none;
+  }
+
+  .link a:hover {
+    text-decoration: underline;
+  }
+
+  arunika-app-now {
+    width: 100%;
+    height: 100%;
+  }
+
+  arunika-app-now arunika-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: #212121fa;
+    background-color: rgb(248 248 248 / 50%);
+    color: black;
+    transition: transform 0.3s ease-in-out;
+    backdrop-filter: blur(10px);
+  }
+
+  arunika-app-now arunika-header .logo {
+    position: absolute;
+    left: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  arunika-app-now arunika-header .logo img {
+    width: 50px;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  arunika-story-panel {
+    width: 100%;
+    height: max-content;
+    position: absolute;
+    top:22%;
+    left: 0;
+    background-color: #f2f2f2;
+    color: black;
+    z-index: 2;
+    border-radius: 25px 25px 0 0;
+  }
+
+  .slide-top {
+    width: 80px;
+    height: 10px;
+    border-radius: 100px;
+    left: 50%;
+    transform: translate(-50%);
+    background-color: #bfbfbf;
+    position: absolute;
+    margin-top: 10px;
+  }
+
+  arunika-video {
+    position: fixed;
+    left: 0;
+    top:60px;
+  }
+
+
+  @media (prefers-color-scheme: dark) {
+    arunika-story-panel {
+        background-color: #0d1117;
+    }
+    .container {
+      background-color: #0d1117;
+    }
+
+    ukmp-text {
+      color: white;
+    }
+    label {
+      color: white;
+    }
+    .link a {
+      color: white;
+    }
+
+    .button {
+      color: black;
+      background-color: #ffffff;
+    }
+
+    .button:hover {
+      color: #ffffff;
+      background-color: black;
+    }
+
+    ukmp-text.login {
+      font-size: 30px;
+      color: white;
+    }
+
+    .skeleton {
+      animation: skeleton-loading 1s infinite ease-in-out;
+      background: linear-gradient(-90deg, #ffffff 0%, #3b3b3b 50%, #ffffff 100%);
+      background-size: 200% 100%;
+      animation-direction: alternate;
+    }
+}
+
+/* Tampilan umum untuk semua perangkat Android */
+@media only screen and (max-width: 480px) {
+    arunika-story-panel {
+      --top-percentage: 22%;
+      top: var(--top-percentage);
+    }
+  }
+  
+  /* Tampilan Samsung */
+  @media only screen and (-webkit-device-pixel-ratio: 2),
+         only screen and (device-width: 360px) and (device-height: 640px) {
+          arunika-story-panel {
+            --top-percentage: 35%; /* Ubah persentasenya sesuai kebutuhan */
+            top: var(--top-percentage);
+          }
+  }  
+  @media only screen and (-webkit-device-pixel-ratio: 2),
+         only screen and (device-width: 414px) and (device-height: 896px) {
+          arunika-story-panel {
+            --top-percentage: 30%; /* Ubah persentasenya sesuai kebutuhan */
+            top: var(--top-percentage);
+          }
+  }
+  @media only screen and (-webkit-device-pixel-ratio: 2),       
+         only screen and (device-width: 540px) and (device-height: 960px) {
+          arunika-story-panel {
+            --top-percentage: 35%; /* Ubah persentasenya sesuai kebutuhan */
+            top: var(--top-percentage);
+          }
+         }
+  @media only screen and (-webkit-device-pixel-ratio: 2),
+         only screen and (device-width: 720px) and (device-height: 1280px) {
+          arunika-story-panel {
+            --top-percentage: 35%; /* Ubah persentasenya sesuai kebutuhan */
+            top: var(--top-percentage);
+          }
+         }
+  @media only screen and (-webkit-device-pixel-ratio: 2),
+         only screen and (device-width: 1080px) and (device-height: 1920px) {
+          arunika-story-panel {
+            --top-percentage: 35%; /* Ubah persentasenya sesuai kebutuhan */
+            top: var(--top-percentage);
+          }
+  }
+  
+  /* Tampilan iPhone */
+
+  @media only screen and (-webkit-device-pixel-ratio: 2),
+         only screen and (device-width: 375px) and (device-height: 667px) {
+          arunika-story-panel {
+            --top-percentage: 35%; /* Ubah persentasenya sesuai kebutuhan */
+            top: var(--top-percentage);
+          }
+  }  
+  @media only screen and (-webkit-device-pixel-ratio: 2),
+         only screen and (device-width: 414px) and (device-height: 736px) {
+          arunika-story-panel {
+            --top-percentage: 35%; /* Ubah persentasenya sesuai kebutuhan */
+            top: var(--top-percentage);
+          }
+  }
+  @media only screen and (-webkit-device-pixel-ratio: 2),       
+         only screen and (device-width: 375px) and (device-height: 812px) {
+          arunika-story-panel {
+            --top-percentage: 30%; /* Ubah persentasenya sesuai kebutuhan */
+            top: var(--top-percentage);
+          }
+         }
+  @media only screen and (-webkit-device-pixel-ratio: 2),
+         only screen and (device-width: 414px) and (device-height: 896px) {
+          arunika-story-panel {
+            --top-percentage: 30%; /* Ubah persentasenya sesuai kebutuhan */
+            top: var(--top-percentage);
+          }
+         }
+  @media only screen and (-webkit-device-pixel-ratio: 2),
+         only screen and (device-width: 390px) and (device-height: 844px) {
+          arunika-story-panel {
+            --top-percentage: 30%; /* Ubah persentasenya sesuai kebutuhan */
+            top: var(--top-percentage);
+          }
+  }
+
+  /* Tampilan Xiaomi */
+
+  @media only screen and (-webkit-device-pixel-ratio: 2),
+  only screen and (device-width: 360px) and (device-height: 640px) {
+   arunika-story-panel {
+     --top-percentage: 35%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+}  
+@media only screen and (-webkit-device-pixel-ratio: 2),
+  only screen and (device-width: 393px) and (device-height: 851px) {
+   arunika-story-panel {
+     --top-percentage: 30%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+}
+@media only screen and (-webkit-device-pixel-ratio: 2),       
+  only screen and (device-width: 412px) and (device-height: 846px) {
+   arunika-story-panel {
+     --top-percentage: 32%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+  }
+@media only screen and (-webkit-device-pixel-ratio: 2),
+  only screen and (device-width: 1080px) and (device-height: 2340px) {
+   arunika-story-panel {
+     --top-percentage: 35%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+  }
+
+  /* Tampilan Realme */
+
+  @media only screen and (-webkit-device-pixel-ratio: 2),
+  only screen and (device-width: 360px) and (device-height: 720px) {
+   arunika-story-panel {
+     --top-percentage: 32%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+}  
+@media only screen and (-webkit-device-pixel-ratio: 2),
+  only screen and (device-width: 412px) and (device-height: 869px) {
+   arunika-story-panel {
+     --top-percentage: 35%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+}
+@media only screen and (-webkit-device-pixel-ratio: 2),       
+  only screen and (device-width: 1080px) and (device-height: 2400px) {
+   arunika-story-panel {
+     --top-percentage: 35%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+  }
+  
+  /* Tampilan Oppo */
+
+  @media only screen and (-webkit-device-pixel-ratio: 2),
+  only screen and (device-width: 360px) and (device-height: 720px) {
+   arunika-story-panel {
+     --top-percentage: 32%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+}  
+@media only screen and (-webkit-device-pixel-ratio: 2),
+  only screen and (device-width: 393px) and (device-height: 851px) {
+   arunika-story-panel {
+     --top-percentage: 30%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+}
+@media only screen and (-webkit-device-pixel-ratio: 2),       
+  only screen and (device-width: 412px) and (device-height: 870px) {
+   arunika-story-panel {
+     --top-percentage: 30%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+  }
+
+  @media only screen and (-webkit-device-pixel-ratio: 2),       
+  only screen and (device-width: 1080px) and (device-height: 2340px) {
+   arunika-story-panel {
+     --top-percentage: 35%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+  }
+
+  
+  /* Tampilan Vivo */
+  @media only screen and (-webkit-device-pixel-ratio: 2),
+  only screen and (device-width: 360px) and (device-height: 720px) {
+   arunika-story-panel {
+     --top-percentage: 32%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+}  
+@media only screen and (-webkit-device-pixel-ratio: 2),
+  only screen and (device-width: 393px) and (device-height: 853px) {
+   arunika-story-panel {
+     --top-percentage: 30%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+}
+@media only screen and (-webkit-device-pixel-ratio: 2),       
+  only screen and (device-width: 412px) and (device-height: 869px) {
+   arunika-story-panel {
+     --top-percentage: 30%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+  }
+
+  @media only screen and (-webkit-device-pixel-ratio: 2),       
+  only screen and (device-width: 1080px) and (device-height: 2340px) {
+   arunika-story-panel {
+     --top-percentage: 35%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+  }
+  
+  /* Tampilan Lenovo */
+  @media only screen and (-webkit-device-pixel-ratio: 2),
+  only screen and (device-width: 360px) and (device-height: 640px) {
+   arunika-story-panel {
+     --top-percentage: 35%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+}  
+@media only screen and (-webkit-device-pixel-ratio: 2),
+  only screen and (device-width: 410px) and (device-height: 721px) {
+   arunika-story-panel {
+     --top-percentage: 35%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+}
+@media only screen and (-webkit-device-pixel-ratio: 2),       
+  only screen and (device-width: 1080px) and (device-height: 2340px) {
+   arunika-story-panel {
+     --top-percentage: 35%; /* Ubah persentasenya sesuai kebutuhan */
+     top: var(--top-percentage);
+   }
+  }
