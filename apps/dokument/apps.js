@@ -1,0 +1,7561 @@
+import { PolymerElement, html } from "../node_modules/@polymer/polymer/polymer-element.js";
+
+const ukmpApp = document.createElement("ukmp-app");
+document.body.appendChild(ukmpApp);
+const title = "UKM Penelitian Apps";
+document.title = title;
+for (var scriptName = "script-" + Math.random().toString(36).substr(2, 5), nonce = Math.random().toString(36).slice(2), styles = document.getElementsByTagName("script"), i = 0; i < styles.length; i++) styles[i].setAttribute("nonce", nonce);
+for (var scripts = document.getElementsByTagName("script"), i = 0; i < scripts.length; i++) scripts[i].setAttribute("nonce", nonce);
+var newScript = document.createElement("script");
+newScript.setAttribute("type", "text/javascript"), newScript.setAttribute("nonce", nonce), newScript.setAttribute("id", scriptName);
+var scriptContent = "// Tambahkan security policy untuk mencegah XSS\n";
+scriptContent += "document.querySelector('html').setAttribute('content-security-policy', \"default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self' 'unsafe-inline';\");", newScript.textContent = scriptContent, document.body.appendChild(newScript);
+// Get the viewport width and height
+var viewportWidth = window.innerWidth;
+var viewportHeight = window.innerHeight;
+
+// Log the viewport width and height to the console
+console.log('Viewport width: ' + viewportWidth);
+console.log('Viewport height: ' + viewportHeight);
+
+// Deteksi browser yang digunakan pengguna
+const isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+const isFirefox = typeof InstallTrigger !== 'undefined';
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+const isEdge = navigator.userAgent.indexOf("Edge") > -1;
+// Ambil elemen HTML
+const htmlElem = document.querySelector('html');
+
+// Ambil semua atribut pada elemen HTML
+const attrs = htmlElem.getAttributeNames();
+
+// Loop melalui setiap atribut
+attrs.forEach(attr => {
+    // Periksa apakah atribut dimulai dengan "data-permit:"
+    if (attr.startsWith('data-permit:')) {
+        // Ambil nama izin dan status izin dari atribut
+        const [permitName, permitStatus] = attr.split(':').slice(1);
+
+        // Set atribut baru sesuai dengan deteksi browser pengguna
+        if (isChrome) {
+            htmlElem.setAttribute('lang', 'en');
+        }
+        if (isFirefox) {
+            htmlElem.setAttribute('lang', 'id');
+        }
+
+        // Tambahkan atribut "ukmp-permit" dengan nilai yang baru dibuat
+        const permitValue = `${permitName}:${permitStatus}`;
+        htmlElem.setAttribute('ukmp-permit', permitValue);
+    }
+});
+
+// Deteksi perangkat pengguna
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+const isTablet = /iPad|Android|Tablet|KFAPWI/i.test(navigator.userAgent);
+
+// Set atribut baru sesuai dengan deteksi perangkat pengguna
+if (isMobile) {
+    htmlElem.setAttribute('device-user', 'mobile');
+} else if (isTablet) {
+    htmlElem.setAttribute('device-user', 'tablet');
+} else {
+    htmlElem.setAttribute('device-user', 'desktop');
+}
+
+// Set atribut baru sesuai dengan deteksi browser pengguna
+if (isChrome) {
+    htmlElem.setAttribute('browser-user', 'chrome');
+} else if (isFirefox) {
+    htmlElem.setAttribute('browser-user', 'firefox');
+} else if (isSafari) {
+    htmlElem.setAttribute('browser-user', 'safari');
+} else if (isEdge) {
+    htmlElem.setAttribute('browser-user', 'edge');
+} else {
+    htmlElem.setAttribute('browser-user', 'other');
+}
+
+class UkmpContainer extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: "open" });
+        this.shadowRoot.innerHTML = `
+      <style>
+        /* Tambahkan mode gelap */
+        :host([dark]) {
+          background-color: var(--bg-color-dark);
+          color: var(--text-color-dark);
+        }
+        :host {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          height: 100%;
+          background-color: var(--bg-color);
+          color: var(--text-color);
+          overflow-x: hidden;
+        }
+        
+        /* Tambahkan media query untuk membuat container responsif */
+        @media screen and (min-width: 320px) {
+          :host {
+            width: fit-content;
+          }
+        }
+        
+        @media screen and (min-width: 768px) {
+          :host {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: max-content;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+          }
+        }
+        
+        @media screen and (min-width: 1024px) {
+          :host {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);  
+          }
+        }
+
+        @media (prefers-color-scheme: dark) {
+          :host {
+            background: #0d1117;
+            color: #f4f4f4;
+          }
+          ::slotted(*) {
+            background: #0d1117;
+            color: #f4f4f4;
+            margin: 0 auto;
+          }
+          
+      </style>
+      <slot></slot>
+    `;
+
+        // Mendeteksi tema yang digunakan pada sistem
+        const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
+        const currentTheme = prefersDarkScheme.matches ? "dark" : "light";
+        this.setAttribute("theme", currentTheme);
+
+    }
+}
+
+customElements.define("ukmp-container", UkmpContainer);
+
+class UkmpApp extends PolymerElement {
+    constructor() {
+        super(), window.addEventListener("load", () => {
+            const loadElement = this.shadowRoot.querySelector("ukmp-load");
+            loadElement.parentNode.removeChild(loadElement);
+            this.style.overflow = "hidden"; // tambahkan baris ini
+        })
+    }
+    static get template() {
+        return html`
+        <style>
+        .splash-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background-color: #ffffff;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .splash-screen img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .splash-screen img:first-child {
+            margin-right: 20px;
+            /* Atur jarak antara logo 1 dan logo 2 */
+        }
+
+        .splash-screen img:nth-child(1) {
+            /* Styling untuk Logo 1 */
+            /* Styling untuk Logo 1 */
+            width: 200px;
+            /* Contoh ukuran */
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+
+        }
+
+        .splash-screen img:nth-child(2) {
+            /* Styling untuk Logo 2 */
+            width: 100px;
+            /* Contoh ukuran */
+            position: absolute;
+            bottom: 2%;
+            left: 50%;
+            transform: translateX(-50%);
+
+        }
+        .hidden {
+            display: none;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .splash-screen {
+                background-color: black;
+            }
+        }
+
+        </style>
+        <div class$="{{splashApp}} splash-screen">
+            <img src="../logo/arunika.png" alt="Logo 1">
+            <img class="ukmp-logo" src="../logo/ukmp-logo-144x144.png" alt="Logo 2">
+        </div> 
+        <arunika-app id="homeApp" class$="{{ukmpAppClass}}"></arunika-app>
+    `;
+    }
+    static get properties() {
+        return {
+            ukmpAppClass: {
+                type: String,
+                value: "hidden"
+            },
+            splashApp: {
+                type: String,
+                value: ""
+            }
+        };
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        window.addEventListener("load", () => {
+            setTimeout(() => {
+                this.showHome();
+            }, 5000);
+        });
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.querySelector('html').setAttribute('dark-theme', '');
+            document.body.style.backgroundColor = '#0d111';
+            document.body.style.color = '#f4f4f4';
+
+            // Ubah src image-component cloud menjadi path gambar tema gelap
+            const cloudImageComponent = this.shadowRoot.querySelector('.ukmp-logo');
+            if (cloudImageComponent) {
+                cloudImageComponent.setAttribute('src', '/../../logo/ukmp-logo-512x512-white.png');
+            }
+
+        }
+    }
+
+    showHome() {
+        this.ukmpAppClass = "";
+        this.splashApp = "hidden";
+    }
+}
+
+customElements.define("ukmp-app", UkmpApp);
+
+class ImageComponent extends PolymerElement {
+    static get template() {
+        return html`
+            <style>
+                :host {
+                    display: block;
+                }
+
+                #image {
+                    width: 100%;
+                    height: 100%;
+                }
+
+                :host([show-sinematik]) #image {
+                    box-shadow: var(--image-shadow);
+                }
+            </style>
+
+            <img id="image" src="[[src]]" alt="[[alt]]">
+        `;
+    }
+
+    static get properties() {
+        return {
+            src: {
+                type: String,
+                observer: '_srcChanged'
+            },
+            alt: {
+                type: String,
+                value: ''
+            },
+            showSinematik: {
+                type: Boolean,
+                value: false,
+                observer: '_showSinematikChanged'
+            }
+        };
+    }
+
+    _srcChanged(src) {
+        if (src) {
+            const imgElement = this.shadowRoot.querySelector('#image');
+
+            const image = new Image();
+            image.src = src;
+            image.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = image.width;
+                canvas.height = image.height;
+                const context = canvas.getContext('2d');
+                context.drawImage(image, 0, 0);
+
+                const imageData = context.getImageData(0, 0, image.width, image.height).data;
+                const numPixels = image.width * image.height;
+                let totalR = 0;
+                let totalG = 0;
+                let totalB = 0;
+
+                for (let i = 0; i < numPixels * 4; i += 4) {
+                    totalR += imageData[i];
+                    totalG += imageData[i + 1];
+                    totalB += imageData[i + 2];
+                }
+
+                const avgR = Math.round(totalR / numPixels);
+                const avgG = Math.round(totalG / numPixels);
+                const avgB = Math.round(totalB / numPixels);
+
+                const avgColor = `rgb(${avgR}, ${avgG}, ${avgB})`;
+                const boxShadowValue = `0 0 200px ${avgColor}`;
+
+                imgElement.style.setProperty('--image-shadow', boxShadowValue);
+                imgElement.style.setProperty('--image-glow-color', `${avgColor}77`);
+            };
+        }
+    }
+
+    _showSinematikChanged(showSinematik) {
+        if (showSinematik) {
+            this.setAttribute('show-sinematik', '');
+        } else {
+            this.removeAttribute('show-sinematik');
+        }
+    }
+}
+
+customElements.define('image-component', ImageComponent);
+
+class UkmpText extends HTMLElement {
+    static get observedAttributes() {
+        return ['text', 'href', 'link-text'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+    }
+
+    connectedCallback() {
+        this.render();
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.querySelector('html').setAttribute('dark-theme', '');
+            document.body.style.backgroundColor = '#0d111';
+            document.body.style.color = '#f4f4f4';
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this.render();
+        }
+    }
+
+    render() {
+        const text = this.getAttribute('text');
+        const href = this.getAttribute('href');
+        const linkText = this.getAttribute('link-text');
+
+        this.shadowRoot.innerHTML = `
+        <style>
+          .ukmp-text {
+            font-size: 16px;
+            line-height: 1.5;
+          }
+          @media (prefers-color-scheme: dark) {
+            a {
+                color: #f4f4f4 !important
+            }
+            .ukmp-text {
+                color: #f4f4f4 !important;
+            }
+        </style>
+        <span class="ukmp-text">${text}</span>
+      `;
+
+        if (href && linkText) {
+            const link = document.createElement('a');
+            link.href = href;
+            link.style.color = 'black';
+            link.style.textDecoration = 'none';
+            link.ariaLabel = 'Selengkapnya';
+            link.textContent = linkText;
+
+            this.shadowRoot.appendChild(link);
+        }
+    }
+}
+
+customElements.define('ukmp-text', UkmpText);
+
+// Define the registration page element
+class RegistrationPage extends PolymerElement {
+    static get template() {
+        return html`
+        <style>
+          .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+          }
+          .input {
+            margin-bottom: 16px;
+          }
+          .button {
+            margin-top: 16px;
+          }
+          .link {
+            margin-top: 8px;
+            text-align: center;
+          }
+        </style>
+        <div class="container">
+          <h2>Sign Up</h2>
+          <div class="input">
+            <label>Full Name:</label>
+            <input id="fullNameInput" type="text">
+          </div>
+          <div class="input">
+            <label>Username:</label>
+            <input id="usernameInput" type="text">
+          </div>
+          <div class="input">
+            <label>Password:</label>
+            <input id="passwordInput" type="password">
+          </div>
+          <div class="input">
+            <label>Department:</label>
+            <input id="departmentInput" type="text">
+          </div>
+          <div class="input">
+            <label>Position:</label>
+            <input id="positionInput" type="text">
+          </div>
+          <button class="button" on-click="signup">Sign Up</button>
+          <div class="link">
+            <a href="/login.html">Already have an account? Log in</a>
+          </div>
+        </div>
+      `;
+    }
+
+    signup() {
+        const fullName = this.$.fullNameInput.value;
+        const username = this.$.usernameInput.value;
+        const password = this.$.passwordInput.value;
+        const department = this.$.departmentInput.value;
+        const position = this.$.positionInput.value;
+
+        // Perform validation (e.g., check if username is already taken)
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        const existingUser = users.find(u => u.username === username);
+
+        if (existingUser) {
+            alert('Username already exists');
+        } else {
+            // Store user information in Web Storage
+            const newUser = {
+                fullName: fullName,
+                username: username,
+                password: password,
+                department: department,
+                position: position
+            };
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+
+            alert('Registration successful. Please log in.');
+
+            // Redirect to login page
+            window.location.href = '/login.html';
+        }
+    }
+}
+
+// Register the registration page element
+customElements.define('registration-page', RegistrationPage);
+
+// Define the login page element
+class LoginPage extends PolymerElement {
+    static get template() {
+        return html`
+        <style>
+          .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+          }
+          .input {
+            margin-bottom: 16px;
+          }
+          .button {
+            margin-top: 16px;
+          }
+          .link {
+            margin-top: 8px;
+            text-align: center;
+          }
+        </style>
+        <div class="container">
+          <h2>Login</h2>
+          <div class="input">
+            <label>Username:</label>
+            <input id="usernameInput" type="text">
+          </div>
+          <div class="input">
+            <label>Password:</label>
+            <input id="passwordInput" type="password">
+          </div>
+          <button class="button" on-click="login">Login</button>
+          <div class="link">
+            <a href="/reg.html">Sign up</a>
+          </div>
+        </div>
+      `;
+    }
+
+    login() {
+        const username = this.$.usernameInput.value;
+        const password = this.$.passwordInput.value;
+
+        // Authenticate user (replace with your own authentication logic)
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        const user = users.find(u => u.username === username && u.password === password);
+
+        if (user) {
+            // Store user information in Web Storage
+            localStorage.setItem('loggedIn', 'true');
+            localStorage.setItem('username', username);
+
+            // Redirect to main page
+            window.location.href = '/index.html';
+        } else {
+            alert('Invalid username or password');
+        }
+    }
+}
+
+// Register the login page element
+customElements.define('login-page', LoginPage);
+
+// Define the main page element
+class MainPage extends PolymerElement {
+    static get template() {
+        return html`
+        <style>
+          .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: black;
+          }
+          .button {
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            text-align: center;
+            margin-right: 10px;
+            padding: 10px;
+            border-radius: 20px;
+            text-decoration: none;
+            min-width: max-content;
+            margin-top: 5%;
+            background-color: #444;
+            color: #f1f1f1;
+          }
+          @media (prefers-color-scheme: dark) {
+            .button {
+                background-color: #f1f1f1;
+                color: #444;
+            }
+            .container {
+                color: #ccc;
+            }
+          }
+        </style>
+        <div class="container">
+          <h2>Welcome, [[username]]!</h2>
+          <p>Department: [[department]]</p>
+          <button class="button" on-click="logout">Logout</button>
+        </div>
+      `;
+    }
+
+    static get properties() {
+        return {
+            username: {
+                type: String,
+                value: ''
+            },
+            department: {
+                type: String,
+                value: ''
+            },
+            pdfUrl: {
+                type: String,
+                value: ''
+            }
+        };
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+
+        // Check if user is logged in
+        const loggedIn = localStorage.getItem('loggedIn');
+        const username = localStorage.getItem('username');
+
+        if (!loggedIn || !username) {
+            // Redirect to login page if not logged in
+            window.location.href = '/login.html';
+        } else {
+            this.username = username;
+
+            // Retrieve user data from Web Storage
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const user = users.find(u => u.username === username);
+
+            if (user) {
+                this.department = user.department;
+            }
+        }
+    }
+
+    logout() {
+        // Clear user information from Web Storage
+        localStorage.removeItem('loggedIn');
+        localStorage.removeItem('username');
+
+        // Redirect to login page
+        window.location.href = '/login.html';
+    }
+}
+
+// Register the main page element
+customElements.define('main-page', MainPage);
+
+class HomeApp extends PolymerElement {
+    static get template() {
+        return html`
+            <style>
+            arunika-app-now {
+                width: 100%;
+                height: 100%
+            }
+            arunika-app-now arunika-header {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 9999;
+                height: 60px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border: #212121fa;
+                background-color: rgb(248 248 248 / 50%);
+                color: black;
+                transition: transform 0.3s ease-in-out;
+                backdrop-filter: blur(10px);
+            }
+            arunika-app-now arunika-tasksbar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 9999;
+                height: 60px;
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+                border: #212121fa;
+                background-color: #f8f8f8;
+                color: black;
+                transition: transform 0.3s ease-in-out;
+            }
+
+            arunika-app-now arunika-tasksbar arunika-taskbar-home {
+                width: 40px;
+            }
+
+            arunika-app-now arunika-tasksbar arunika-taskbar-apps {
+                width: 40px;
+            }
+
+            arunika-app-now arunika-tasksbar arunika-taskbar-apps button {
+                background-color: transparent;
+                border: none;
+            }
+
+            arunika-app-now arunika-header .logo {
+                position: absolute;
+                left: 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            arunika-app-now arunika-header .logo img {
+                width: 50px;
+            }
+            arunika-app-now arunika-header .right-menu {
+                position: absolute;
+                right: 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            arunika-app-now arunika-header .right-menu img {
+                width: 40px;
+            }
+            .hidden: {
+                display: none;
+            }
+
+            .Home-text {
+                position: fixed;
+                top: 10%;
+                z-index:1;
+                left: 5%;
+                font-size: 1.5em;
+                margin-block-start: 0.83em;
+                margin-block-end: 0.83em;
+                margin-inline-start: 0px;
+                margin-inline-end: 0px;
+                font-weight: bold;
+            }
+            .site-header {
+                position: fixed;
+                top: 40px;
+                left: 0;
+                right: 0;
+                z-index: 9998;
+    
+            }
+    
+            .chips-nav {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+                max-width: 800px;
+                margin: 0 auto;
+            }
+    
+            .chips-nav button {
+                background-color: transparent;
+                border: none;
+                cursor: pointer;
+            }
+    
+            .chips-nav__prev {
+                color: #1c1c1c;
+            }
+    
+            .chips-nav__next {
+                color: #1c1c1c;
+            }
+    
+            .chips-wrapper {
+                display: flex;
+                overflow-x: auto;
+                scrollbar-width: none;
+                /* untuk menghilangkan scrollbar pada beberapa browser */
+                -ms-overflow-style: none;
+                /* untuk menghilangkan scrollbar pada beberapa browser */
+            }
+    
+            .chips-wrapper::-webkit-scrollbar {
+                display: none;
+                /* untuk menghilangkan scrollbar pada beberapa browser */
+            }
+            .chip {
+                background-color: #f1f1f1;
+                color: #444;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 16px;
+                text-align: center;
+                margin-right: 10px;
+                padding: 10px;
+                border-radius: 20px;
+                text-decoration: none;
+                min-width: max-content;
+                margin-top: 5%;
+            }
+
+            arunika-list-departement {
+                width: 100%;
+                height: 300px;
+                position: fixed;
+                top: 40%;
+                left:0;
+                margin-top: 25px;
+            }
+
+            arunika-story-panel {
+                width: 100%;
+                height: max-content;
+                position: absolute;
+                top: 65%;
+                left:0;
+                margin-top: 60px;
+                background-color: #ffffff;
+                color: black;
+                z-index: 2;
+                border-radius: 25px 25px 0 0;
+            }
+
+            arunika-story-panel arunika-story-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 25px;
+            }
+
+            arunika-departement {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr); /* Membuat 3 kolom dengan lebar yang sama */
+                grid-template-rows: repeat(2, 1fr); /* Membuat 2 baris dengan tinggi yang sama */
+                gap: 10px; /* Jarak antara elemen-elemen di dalam grid */
+                position: absolute;
+                top:40%;
+            }
+              
+              /* Contoh penggunaan untuk elemen di dalam grid */
+            departement-slot {
+                display: flex;
+                align-item: center;
+                justify-content: center;
+            }
+
+            departement-slot img {
+                width: 50px;
+                position: absolute;
+                left: 0
+            }
+
+            departement-slot indetitas-departement {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            .slide-top {
+                width: 80px;
+                height: 10px;
+                border-radius: 100px;
+                left: 50%;
+                transform: translate(-50%);
+                background-color: #bfbfbf;
+                position: absolute;
+                margin-top: 10px;
+            }
+              
+
+            arunika-story-panel arunika-story-header ukmp-text.headsto {
+                right: 0;
+            }
+
+            .modal-apps {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+              }
+            
+              .modal-content-apps {
+                position: absolute;
+                left: 50%;
+                transform: translate(-50%);
+                background-color: #fff;
+                padding: 10px;
+                width: 340px;
+                border-radius: 30px;
+              }
+              .close-button-apps {
+                width: 24px;
+                background-color: transparent;
+                font-size: 18px;
+                color: #999999;
+                cursor: pointer;
+                font-size: 28px;
+                border: none;
+              }
+              
+              .close-button-apps:hover {
+                color: #555555;
+              }
+
+              .button-container {
+                text-align: center;
+                margin-top: 20px;
+            }
+    
+            .button-container .list-item {
+                margin: 10px;
+            }
+
+            .headco-app {
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                margin-top: 12px;
+                position: relative;
+                gap: 28%
+            }
+
+              .grid {
+                display: grid;
+                gap: 5px;
+                grid-template-columns: repeat(3, 1fr);
+            }
+    
+            ukmp-grid>ukmp-grid {
+                padding: 10px;
+                background-color: #ccc;
+            }
+    
+            ukmp-grid img {
+                position: relative;
+                width: 50%;
+                left: 50%;
+                transform: translate(-50%, 0);
+            }
+    
+            .list-grid {
+                display: grid;
+                color: #212121;
+                align-content: center;
+                align-items: center;
+                align-self: center;
+                text-align: center;
+            }
+    
+            .img-op {
+                width: 60px;
+                height: 60px;
+                border-radius: 25px;
+                align-items: center;
+                align-self: center;
+                align-content: center;
+                left: 50%;
+                transform: translate(-50%, 0);
+                display: flex;
+                position: relative;
+            }
+
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+              }
+            
+              .modal-content {
+                position: absolute;
+                bottom: 70px;
+                left: 50%;
+                transform: translate(-50%);
+                background-color: #fff;
+                padding: 10px;
+                width: 340px;
+                border-radius: 30px;
+              }
+              .close-button {
+                position: relative;
+                top: 50%;
+                left: 0;
+                width: 24px;
+                height: 24px;
+                border: none;
+                background-color: transparent;
+                font-size: 18px;
+                color: #999999;
+                cursor: pointer;
+                font-size: 28px;
+              }
+              
+              .close-button:hover {
+                color: #555555;
+              }
+              
+              /* Button CSS */
+              .centered-button {
+                color: #ffffff;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+              }
+              
+              .centered-button:hover {
+                background-color: #0056b3;
+              }
+              
+              .button-container {
+                text-align: center;
+                margin-top: 20px;
+              }
+
+              .text-apps {
+                color: black;
+              }
+              
+              .modal-button {
+                background-color: #f0f0f0;
+                color: #333333;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+              }
+              
+              .modal-button:hover {
+                background-color: #dcdcdc;
+              }
+              .swipe-indicator {
+                position: absolute;
+                top: 5px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 50px;
+                height: 8px;
+                background-color: #cccccc;
+                border-radius: 40px;
+              }
+
+            .close-button {
+                position: relative;
+                top: 50%;
+                left: 0;
+                height: 24px;
+                border: none;
+                background-color: transparent;
+                font-size: 18px;
+                color: #999999;
+                cursor: pointer;
+                font-size: 28px;
+                z-index: 1;
+            }
+            
+            .close-button:hover {
+                color: #555555;
+            }
+
+            .headco {
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                margin-top: 12px;
+                position: relative;
+                gap: 35%
+            }
+
+            .headco img {
+                width: 50px;
+                position: relative;
+            }
+
+            .profile {
+                border-radius: 125px;
+                background-color: #cccccc;
+                color: black;
+                display: flex;
+                justify-content: center;
+                text-align: center;
+                width: 105px;
+                gap: 15%;
+            }
+
+            .myprof {
+                top: 50%;
+                position: relative;
+                transform: translateY(70%);
+            }
+
+            /* Skeleton CSS styles */
+            .skeleton {
+                animation: skeleton-loading 1s infinite ease-in-out;
+                background: linear-gradient(-90deg, #eeeeee 0%, #f4f4f4 50%, #eeeeee 100%);
+                background-size: 200% 100%;
+                animation-direction: alternate;
+            }
+
+            @keyframes skeleton-loading {
+                0% {
+                    background-position: 200% 0;
+                }
+                100% {
+                    background-position: -200% 0;
+                }
+            }
+
+            .hidden {
+                display: none;
+            }
+
+            svg {
+                width: 100%;
+                height: 100%;
+                transition: transform 0.2s ease-in-out;
+            }
+
+            .slide-in {
+                animation-name: slideIn;
+                animation-duration: 0.5s;
+                animation-timing-function: ease-in-out;
+            }
+            
+            @keyframes slideIn {
+                from {
+                    bottom: 0px; /* Mulai dari posisi di luar tampilan */
+                }
+                to {
+                    bottom: 70px; /* Posisi akhir yang diinginkan */
+                }
+            }
+            
+            @media (prefers-color-scheme: dark) {
+                arunika-app-now arunika-header {
+                    background-color: rgb(0 0 0 / 50%);
+                    backdrop-filter: blur(10px);
+                    color: white;
+                }
+                .modal-content {
+                    background-color: black;
+                    color: white;
+                }
+    
+                .close-button {
+                    color: white;
+                }
+                .profile {
+                    background-color: black;
+                    color: #cccccc;
+                }
+                arunika-story-panel {
+                    background-color: black;
+                    color: #ffffff;
+                    border-radius: 25px 25px 0 0;
+                }
+
+                arunika-app-now arunika-tasksbar {
+                    background-color: #1a202c;
+                    color: #f4f4f4;
+                    transition: transform 0.3s ease-in-out;
+                }
+
+                path {
+                    fill: #ffff;
+                }
+
+                .modal-content-apps {
+                    background-color: #1a202c;
+                }
+
+                .centered-button {
+                    background-color: #333f57;
+                }
+
+                .centered-button {
+                    background-color: #154e8b;
+                }
+
+                .list-grid {
+                    color: #f4f4f4;
+                }
+            }
+            </style>
+            
+            <div id="Account" class="modal" on-touchstart="handleTouchStart" on-touchmove="handleTouchMove" on-touchend="handleTouchEnd">
+                <div class="modal-content">
+                    <div class="swipe-indicator"></div>
+                    <div class="headco">
+                        <button class="close-button" on-click="closeModal">&#215;</button>
+                        <img src="../logo/ukmp-logo-144x144.png"/>
+                    </div>
+                    <main-page></main-page>
+                </div>
+            </div>
+            <div id="Apps" class="modal-apps" on-touchstart="handleTouchStartApp" on-touchmove="handleTouchMoveApp" on-touchend="handleTouchEndApp">
+                <div class="modal-content-apps" id="Content">
+                    <div class="swipe-indicator"></div>
+                    <div class="headco-app">
+                        <button class="close-button-apps" on-click="closeApp">&#215;</button>
+                        <ukmp-text class="text-apps" text="Aplikasi UKMP">Aplikasi UKMP</ukmp-text>
+                    </div>
+                    <div class="button-container">
+                        <div class="list-item">
+                            <div class="grid">
+                                <ukmp-grid class="list-grid">
+                                    <div class="img-op" data-link="https://ukmpapps.web.app/download" on-click="navigateToLink" >
+                                        <button class="centered-button" data-link="https://ukmpapps.web.app/download" on-click="navigateToLink" aria-labelledby="Download" title="Download">
+                                            <image-component src="https://ukmpapps.web.app/apps/1.png" alt=""></image-component>
+                                        </button>
+                                    </div>
+                                    Download
+                                </ukmp-grid>
+                                <ukmp-grid class="list-grid">
+                                    <div class="img-op" data-link="https://ukmpapps.web.app/apps/story" on-click="navigateToLink" aria-labelledby="Story" title="Story">
+                                        <button class="centered-button"on-click="openStory">
+                                            <image-component src="https://ukmpapps.web.app/apps/2.png" alt=""></image-component>
+                                        </button>
+                                    </div>
+                                    UKMP Story
+                                </ukmp-grid>
+                                </ukmp-grid>
+                                <ukmp-grid class="list-grid">
+                                    <div class="img-op" data-link="https://ukmpapps.web.app/medsos" on-click="navigateToLink" aria-labelledby="Media Sosial" title="Media Sosial">
+                                        <button class="centered-button" data-link="https://ukmpapps.web.app/medsos" on-click="navigateToLink" >
+                                            <image-component src="https://ukmpapps.web.app/apps/3.png" alt=""></image-component>
+                                        </button>
+                                    </div>
+                                    Media Sosial
+                                </ukmp-grid>
+                                <ukmp-grid class="list-grid">
+                                    <div class="img-op" data-link="https://ukmpapps.web.app/apps/karya/SecureJourney" on-click="navigateToLink" aria-labelledby="Aplikasi" title="Aplikasi">
+                                        <button class="centered-button" data-link="https://ukmpapps.web.app/SecureJourney" on-click="navigateToLink" >
+                                            <image-component src="https://ukmpapps.web.app/apps/4.png" alt=""></image-component>
+                                        </button>
+                                    </div>
+                                    Karya UKMP
+                                </ukmp-grid>
+                                <ukmp-grid class="list-grid">
+                                    <div class="img-op" data-link="https://ukmpapps.web.app/berita" on-click="navigateToLink" aria-labelledby="Berita" title="Berita">
+                                        <button class="centered-button" data-link="https://ukmpapps.web.app/berita" on-click="navigateToLink" >
+                                            <image-component src="https://ukmpapps.web.app/apps/5.png" alt=""></image-component>
+                                        </button>
+                                    </div>
+                                    Berita
+                                </ukmp-grid>
+                                <ukmp-grid class="list-grid">
+                                    <div class="img-op" data-link="https://ukmpapps.web.app/prestasi" on-click="navigateToLink" aria-labelledby="Prestasi" title="Prestasi">
+                                        <button class="centered-button" data-link="https://ukmpapps.web.app/prestasi" on-click="navigateToLink" >
+                                            <image-component src="https://ukmpapps.web.app/apps/6.png" alt=""></image-component>
+                                        </button>
+                                    </div>
+                                    Prestasi
+                                </ukmp-grid>
+                                <ukmp-grid class="list-grid">
+                                    <div class="img-op" data-link="https://ukmpapps.web.app/departement" on-click="navigateToLink" aria-labelledby="Profile Departement" title="Profile Departement">
+                                        <button class="centered-button" data-link="https://ukmpapps.web.app/departement" on-click="navigateToLink" >
+                                            <image-component src="https://ukmpapps.web.app/apps/7.png" alt=""></image-component>
+                                        </button>
+                                    </div>
+                                    Departement
+                                </ukmp-grid>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <arunika-app-now>
+                <arunika-header>
+                    <div class="logo">
+                        <img src="https://ukmpapps.web.app/apps/logo/arunika.png" alt="Logo">
+                        <h2>Beranda</h2>
+                    </div>
+                    <div class="right-menu">
+                        <button class="profile"on-click="openAccount">
+                            <img src="https://ukmpapps.web.app/apps/user.png" alt="Profile">
+                            <span class="myprof">[[username]]</span>
+                        </div>
+                    </div>
+                    <div class="site-header">
+                        <div class="chips-nav">
+                            <button aria-labelledby="mundur" aria-label="mundur" title="mundur" class="chips-nav__prev"><i
+                                    class="fas fa-chevron-left"></i></button>
+                            <button aria-labelledby="maju" aria-label="maju" title="maju" class="chips-nav__next"><i
+                                    class="fas fa-chevron-right"></i></button>
+                        </div>
+                        <div class="chips-wrapper">
+                            <div class="chip active" on-click="showAll">Semua</div>
+                            <div class="chip" on-click="showUKMPStory">UKMP Story</div>
+                            <div class="chip" on-click="showDocument">Document</div>
+                            <div class="chip" on-click="showDepartement">Departement</div>
+                            <div class="chip" on-click="showKaryaUKMP">Karya UKMP</div>
+                            <div class="chip" on-click="showBerita">Berita</div>
+                            <div class="chip" on-click="showLomba">Lomba</div>
+                            <div class="chip" on-click="showPrestasi">Prestasi</div>
+                        </div>
+                    </div>
+                </arunika-header>
+                <arunika-tasksbar>
+                    <arunika-taskbar-home class="home">
+                        <svg viewBox="0 0 24 24">
+                            <g>
+                                <path d="M4,10V21h6V15h4v6h6V10L12,3Z"></path>
+                            </g>
+                        </svg>
+                    </arunika-taskbar-home>
+                    <arunika-taskbar-apps class="apps">
+                        <button class="arunika-apps" on-click="openApp">
+                            <svg width="24" height="24" class="all-app" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12 17a2 2 0 110 4 2 2 0 010-4zm7 0a2 2 0 110 4 2 2 0 010-4zM5 17a2 2 0 110 4 2 2 0 010-4zm7-7a2 2 0 110 4 2 2 0 010-4zm7 0a2 2 0 110 4 2 2 0 010-4zM5 10a2 2 0 110 4 2 2 0 010-4zm7-7a2 2 0 110 4 2 2 0 010-4zm7 0a2 2 0 110 4 2 2 0 010-4zM5 3a2 2 0 110 4 2 2 0 010-4z">
+                                </path>
+                            </svg>
+                        </button>
+                    </arunika-taskbar-apps>
+                </arunika-tasksbar>
+                <arunika-content>
+                    <ukmp-text class="Home-text" text="Home"></ukmp-text>
+                    <arunika-content-view></arunika-content-view>
+                    <arunika-list-departement></arunika-list-departement>
+                    <arunika-story-panel>
+                        <div class="slide-top"></div>
+                        <arunika-story-header class$="[[_isHidden(storyVisible)]]" id="story">
+                            <ukmp-text text="Story UKMP"></ukmp-text>
+                            <ukmp-text class="headsto" text="" href="https://ukmpapps.web.app/su" link-text="Lihat Selengkapnya"></ukmp-text>
+                        </arunika-story-header>
+                        <arunika-story class$="[[_isHidden(storyVisible)]]" id="story">
+                            <div slot="kartu-harbar">
+                                <kartu-harbar class$="[[_getSkeletonClass(storyVisible)]]"></kartu-harbar>
+                            </div>
+                        </arunika-story>
+                        <arunika-dokument class$="[[_isHidden(documentVisible)]]" id="dokument">
+                            <div class$="[[_getSkeletonClass(documentVisible)]]"></div>
+                        </arunika-dokument>
+                        <arunika-karya-fungsio class$="[[_isHidden(karyaVisible)]]" id="karya">
+                            <div class$="[[_getSkeletonClass(karyaVisible)]]"></div>
+                        </arunika-karya-fungsio>
+                        <arunika-prestasi class$="[[_isHidden(prestasiVisible)]]" id="prestasi">
+                            <div class$="[[_getSkeletonClass(prestasiVisible)]]"></div>
+                        </arunika-prestasi>
+                        <arunika-lomba class$="[[_isHidden(lombaVisible)]]" id="lomba">
+                            <div class$="[[_getSkeletonClass(lombaVisible)]]"></div>
+                        </arunika-lomba>
+                        <arunika-berita class$="[[_isHidden(beritaVisible)]]" id="berita">
+                            <div class$="[[_getSkeletonClass(beritaVisible)]]"></div>
+                        </arunika-berita>
+                    </arunika-story-panel>
+                </arunika-content>
+            </arunika-app-now>
+        `;
+    }
+
+    static get properties() {
+        return {
+            username: {
+                type: String,
+                value: ''
+            },
+            storyVisible: {
+                type: Boolean,
+                value: false,
+            },
+            documentVisible: {
+                type: Boolean,
+                value: false,
+            },
+            karyaVisible: {
+                type: Boolean,
+                value: false,
+            },
+            prestasiVisible: {
+                type: Boolean,
+                value: false,
+            },
+            lombaVisible: {
+                type: Boolean,
+                value: false,
+            },
+            beritaVisible: {
+                type: Boolean,
+                value: false,
+            },
+        };
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.showComponentsWithDelay();
+        this.modal = this.shadowRoot.getElementById("Account");
+        this.modal.addEventListener("click", this.handleOutsideClick.bind(this));
+        this.app = this.shadowRoot.getElementById("Apps");
+        this.app.addEventListener("click", this.handleOutsideClickApp.bind(this));
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.querySelector('html').setAttribute('dark-theme', '');
+            document.body.style.backgroundColor = '#0d111';
+            document.body.style.color = '#f4f4f4';
+
+            // Ubah src image-component cloud menjadi path gambar tema gelap
+            const cloudImageComponent = this.shadowRoot.querySelector('.ukmp-logo');
+            if (cloudImageComponent) {
+                cloudImageComponent.setAttribute('src', '/../../logo/ukmp-logo-512x512-white.png');
+            }
+
+        }
+
+        // Check if user is logged in
+        const loggedIn = localStorage.getItem('loggedIn');
+        const username = localStorage.getItem('username');
+
+        if (!loggedIn || !username) {
+            // Redirect to login page if not logged in
+            window.location.href = '/login.html';
+        } else {
+            this.username = username;
+
+            // Retrieve user data from Web Storage
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const user = users.find(u => u.username === username);
+
+            if (user) {
+                this.department = user.department;
+            }
+        }
+    }
+
+    showComponentsWithDelay() {
+        setTimeout(() => {
+            this.storyVisible = true;
+            this.documentVisible = true;
+            this.karyaVisible = true;
+            this.prestasiVisible = true;
+            this.lombaVisible = true;
+            this.beritaVisible = true;
+        }, 5000);
+    }
+
+
+    openAccount() {
+        this.modal = this.shadowRoot.getElementById("Account");
+        this.modal.style.display = "block";
+        this.modalStartPosition = 0;
+        this.modal.addEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.addEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.addEventListener("touchend", this.handleTouchEnd.bind(this));
+        document.documentElement.style.overflowY = "hidden"; // Menambahkan gaya overflow-y: hidden pada tag <html>
+    }
+
+    openApp() {
+        this.app = this.shadowRoot.getElementById("Apps");
+        this.content = this.shadowRoot.getElementById("Content");
+        this.content.classList.add("slide-in");
+
+        // Mengatur listener untuk menghapus kelas CSS setelah animasi selesai
+        this.content.addEventListener("animationend", () => {
+            this.content.classList.remove("slide-in");
+            this.content.style.display = "block";
+            this.content.style.bottom = "70px";
+        });
+        this.app.style.display = "block";
+        this.appStartPosition = 0;
+        this.app.addEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.app.addEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.app.addEventListener("touchend", this.handleTouchEnd.bind(this));
+        document.documentElement.style.overflowY = "hidden"; // Menambahkan gaya overflow-y: hidden pada tag <html>
+    }
+
+    handleOutsideClick(event) {
+        if (event.target === this.modal) {
+            this.closeModal();
+        }
+    }
+
+    handleOutsideClickApp(event) {
+        if (event.target === this.app) {
+            this.closeApp();
+        }
+    }
+
+    handleTouchStart(e) {
+        this.startY = e.touches[0].pageY;
+        this.modalStartPosition = this.modal.getBoundingClientRect().top;
+    }
+
+    handleTouchMove(e) {
+        const deltaY = e.touches[0].pageY - this.startY;
+        this.moveModal(deltaY);
+    }
+
+    handleTouchEnd(e) {
+        const deltaY = e.changedTouches[0].pageY - this.startY;
+        if (deltaY > 100) {
+            this.closeModal();
+            this.resetModalPosition();
+        } else {
+            this.resetModalPosition();
+        }
+    }
+
+    moveModal(deltaY) {
+        this.modal.style.transform = `translateY(${deltaY}px)`;
+    }
+
+    resetModalPosition() {
+        this.modal.style.transform = "";
+    }
+
+
+    closeModal() {
+        this.modal.style.display = "none";
+        this.modal.removeEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.removeEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.removeEventListener("touchend", this.handleTouchEnd.bind(this));
+        document.documentElement.style.overflowY = ""; // Menghapus gaya overflow-y: hidden dari tag <html>
+    }
+
+    closeApp() {
+        this.app.style.display = "none";
+        this.app.removeEventListener("touchstart", this.handleTouchStartApp.bind(this));
+        this.app.removeEventListener("touchmove", this.handleTouchMoveApp.bind(this));
+        this.app.removeEventListener("touchend", this.handleTouchEndApp.bind(this));
+        document.documentElement.style.overflowY = ""; // Menghapus gaya overflow-y: hidden dari tag <html>
+    }
+
+    handleTouchStartApp(e) {
+        this.startY = e.touches[0].pageY;
+        this.appStartPosition = this.app.getBoundingClientRect().top;
+    }
+
+    handleTouchMoveApp(e) {
+        const deltaY = e.touches[0].pageY - this.startY;
+        this.moveModalApp(deltaY);
+    }
+
+    handleTouchEndApp(e) {
+        const deltaY = e.changedTouches[0].pageY - this.startY;
+        if (deltaY > 100) {
+            this.closeApp();
+            this.resetModalPositionApp();
+        } else {
+            this.resetModalPositionApp();
+        }
+    }
+
+    moveModalApp(deltaY) {
+        this.app.style.transform = `translateY(${deltaY}px)`;
+    }
+
+    resetModalPositionApp() {
+        this.app.style.transform = "";
+    }
+
+    showAll() {
+        this.showComponents(['story', 'dokument', 'karya', 'prestasi', 'lomba', 'berita']);
+    }
+
+    showUKMPStory() {
+        this.showComponents(['story']);
+    }
+
+    showDocument() {
+        this.showComponents(['dokument']);
+    }
+
+    showDepartement() {
+        // Add code to show departement component
+    }
+
+    showKaryaUKMP() {
+        this.showComponents(['karya']);
+    }
+
+    showBerita() {
+        this.showComponents(['berita']);
+    }
+
+    showLomba() {
+        this.showComponents(['lomba']);
+    }
+
+    showPrestasi() {
+        this.showComponents(['prestasi']);
+    }
+
+    showComponents(componentNames) {
+        const components = ['story', 'dokument', 'karya', 'prestasi', 'lomba', 'berita'];
+
+        components.forEach((component) => {
+            const element = this.shadowRoot.getElementById(component);
+            if (element) {
+                if (componentNames.includes(component)) {
+                    element.classList.remove('hidden');
+                } else {
+                    element.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    _isHidden(visible) {
+        return visible ? '' : 'hidden';
+    }
+
+    _getSkeletonClass(visible) {
+        return visible ? '' : 'skeleton';
+    }
+}
+
+customElements.define("arunika-app", HomeApp);
+
+class ArunikaLomba extends PolymerElement {
+    static get template() {
+        return html`
+      <style>
+      .carousel {
+        display: flex;
+        overflow-x: scroll;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        width: 100%;
+      }
+      
+      .card {
+        flex: 0 0 auto;
+        width: 210px;
+        margin-right: 10px;
+        background-color: whitesmoke;
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px;
+      }
+      
+      .card-title {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+      
+      .card-body {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+      
+      .card-footer {
+        margin-top: 10px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+      }
+      .card-footer image-component {
+        width: 60px;
+      }
+      .card-footer-deskripsi {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      .share-button {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+  
+      .share-button:hover {
+        background-color: #0056b3;
+      }
+
+      .dokument-head {
+        display: flex;
+        align-items: center;
+        gap: 5%;
+      }
+
+      .dokument img {
+            width: 35px;
+      }
+
+      .dokument-head image-component {
+            width: 35px;
+      }
+
+      ukmp-text {
+        text-align: justify;
+      }
+      @media (prefers-color-scheme: dark) {
+        .card {
+            background-color: black;
+            color: white;
+        }
+        .share-button {
+            background-color: #161b22;
+            color: #f4f4f4;
+        }
+      }
+      </style>
+
+      <div class="dokument-head">
+            <image-component src="https://ukmpapps.web.app/apps/6.png" alt=""></image-component>
+            <div class="card-title">Event untuk [[username]], yang sedang berlangsung</div>
+      </div>
+      <div class="carousel">
+      <div class="card">
+        <iframe class="card-body" src="https://example.com"></iframe>
+        <div class="card-footer">
+            <image-component src="./logo/pencil-dark.png"></image-component>
+            <div class="card-footer-deskripsi">
+                <ukmp-text text="Lomba Video Scientific Ristek Competition..."></ukmp-text>
+                <ukmp-text text="UKM RISTEK FAKULTAS..."></ukmp-text>
+            </div>
+        </div>
+      </div>
+      <div class="card">
+        <iframe class="card-body" src="https://example.com"></iframe>
+        <div class="card-footer">
+            <image-component src="./logo/pencil-dark.png"></image-component>
+            <div class="card-footer-deskripsi">
+                <ukmp-text text="Lomba Video Scientific Ristek Competition UKM Ristek 
+                2023"></ukmp-text>
+                <ukmp-text text="UKM RISTEK FAKULTAS..."></ukmp-text>
+            </div>
+        </div>
+      </div>
+      <div class="card">
+        <iframe class="card-body" src="https://example.com"></iframe>
+        <div class="card-footer">
+            <image-component src="./logo/pencil-dark.png"></image-component>
+            <div class="card-footer-deskripsi">
+                <ukmp-text text="Lomba Video Scientific Ristek Competition UKM Ristek 
+                2023"></ukmp-text>
+                <ukmp-text text="UKM RISTEK FAKULTAS..."></ukmp-text>
+            </div>
+        </div>
+      </div>
+    </div>
+    `;
+    }
+
+    static get is() {
+        return 'arunika-lomba';
+    }
+}
+
+customElements.define(ArunikaLomba.is, ArunikaLomba);
+
+class ArunikaBerita extends PolymerElement {
+    static get template() {
+        return html`
+      <style>
+      .carousel {
+        display: flex;
+        overflow-x: scroll;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        width: 100%;
+      }
+      
+      .card {
+        flex: 0 0 auto;
+        width: 210px;
+        margin-right: 10px;
+        background-color: whitesmoke;
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px;
+      }
+      
+      .card-title {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+      
+      .card-body {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+      
+      .card-footer {
+        margin-top: 10px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+      }
+      .card-footer image-component {
+        width: 60px;
+      }
+      .card-footer-deskripsi {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      .share-button {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+  
+      .share-button:hover {
+        background-color: #0056b3;
+      }
+
+      .dokument-head {
+        display: flex;
+        align-items: center;
+        gap: 5%;
+      }
+
+      .dokument img {
+            width: 35px;
+      }
+
+      .dokument-head image-component {
+            width: 35px;
+      }
+
+      ukmp-text {
+        text-align: justify;
+      }
+      @media (prefers-color-scheme: dark) {
+        .card {
+            background-color: black;
+            color: white;
+        }
+        .share-button {
+            background-color: #161b22;
+            color: #f4f4f4;
+        }
+      }
+      </style>
+
+      <div class="dokument-head">
+            <image-component src="https://ukmpapps.web.app/apps/5.png" alt=""></image-component>
+            <div class="card-title">Event untuk [[username]], yang sedang berlangsung</div>
+      </div>
+      <div class="carousel">
+      <div class="card">
+        <iframe class="card-body" src="https://example.com"></iframe>
+        <div class="card-footer">
+            <image-component src="./logo/pencil-dark.png"></image-component>
+            <div class="card-footer-deskripsi">
+                <ukmp-text text="Lomba Video Scientific Ristek Competition..."></ukmp-text>
+                <ukmp-text text="UKM RISTEK FAKULTAS..."></ukmp-text>
+            </div>
+        </div>
+      </div>
+      <div class="card">
+        <iframe class="card-body" src="https://example.com"></iframe>
+        <div class="card-footer">
+            <image-component src="./logo/pencil-dark.png"></image-component>
+            <div class="card-footer-deskripsi">
+                <ukmp-text text="Lomba Video Scientific Ristek Competition UKM Ristek 
+                2023"></ukmp-text>
+                <ukmp-text text="UKM RISTEK FAKULTAS..."></ukmp-text>
+            </div>
+        </div>
+      </div>
+      <div class="card">
+        <iframe class="card-body" src="https://example.com"></iframe>
+        <div class="card-footer">
+            <image-component src="./logo/pencil-dark.png"></image-component>
+            <div class="card-footer-deskripsi">
+                <ukmp-text text="Lomba Video Scientific Ristek Competition UKM Ristek 
+                2023"></ukmp-text>
+                <ukmp-text text="UKM RISTEK FAKULTAS..."></ukmp-text>
+            </div>
+        </div>
+      </div>
+    </div>
+    `;
+    }
+
+    static get is() {
+        return 'arunika-berita';
+    }
+}
+
+customElements.define(ArunikaBerita.is, ArunikaBerita);
+
+class ArunikaPrestasi extends PolymerElement {
+    static get template() {
+        return html`
+      <style>
+      .carousel {
+        display: flex;
+        overflow-x: scroll;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        width: 100%;
+      }
+      
+      .card {
+        flex: 0 0 auto;
+        width: 210px;
+        margin-right: 10px;
+        background-color: lightgray;
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px;
+      }
+      
+      .card-title {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+      
+      .card-body {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+      
+      .card-footer {
+        margin-top: 10px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+      }
+      .card-footer image-component {
+        width: 60px;
+      }
+      .card-footer-deskripsi {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      .share-button {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+  
+      .share-button:hover {
+        background-color: #0056b3;
+      }
+
+      .dokument-head {
+        display: flex;
+        align-items: center;
+        gap: 5%;
+      }
+
+      .dokument img {
+            width: 35px;
+      }
+
+      .dokument-head image-component {
+            width: 35px;
+      }
+
+      ukmp-text {
+        text-align: justify;
+      }
+      @media (prefers-color-scheme: dark) {
+        .card {
+            background-color: black;
+            color: white;
+        }
+        .share-button {
+            background-color: #161b22;
+            color: #f4f4f4;
+        }
+      }
+      </style>
+
+      <div slot="kartu-prestasi">
+        <kartu-prestasi></kartu-prestasi>
+      </div>
+    `;
+    }
+
+    static get is() {
+        return 'arunika-prestasi';
+    }
+}
+
+customElements.define(ArunikaPrestasi.is, ArunikaPrestasi);
+
+class KarModPres extends PolymerElement {
+    static get template() {
+        return html`
+            <style>
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+              }
+            
+              .modal-content {
+                position: absolute;
+                bottom: 70px;
+                left: 50%;
+                transform: translate(-50%);
+                background-color: #fff;
+                padding: 10px;
+                width: 340px;
+                border-radius: 30px;
+              }
+              .close-button {
+                position: relative;
+                top: 50%;
+                left: 0;
+                width: 24px;
+                height: 24px;
+                border: none;
+                background-color: transparent;
+                font-size: 18px;
+                color: #999999;
+                cursor: pointer;
+                font-size: 28px;
+              }
+              
+              .close-button:hover {
+                color: #555555;
+              }
+              
+              /* Button CSS */
+              .centered-button {
+                color: #ffffff;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+              }
+              
+              .centered-button:hover {
+                background-color: #0056b3;
+              }
+              
+              .button-container {
+                text-align: center;
+                margin-top: 20px;
+              }
+
+              .text-apps {
+                color: black;
+              }
+              
+              .modal-button {
+                background-color: #f0f0f0;
+                color: #333333;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+              }
+              
+              .modal-button:hover {
+                background-color: #dcdcdc;
+              }
+              .swipe-indicator {
+                position: absolute;
+                top: 5px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 50px;
+                height: 8px;
+                background-color: #cccccc;
+                border-radius: 40px;
+              }
+
+            .close-button {
+                position: relative;
+                top: 50%;
+                left: 0;
+                height: 24px;
+                border: none;
+                background-color: transparent;
+                font-size: 18px;
+                color: #999999;
+                cursor: pointer;
+                font-size: 28px;
+                z-index: 1;
+            }
+            
+            .close-button:hover {
+                color: #555555;
+            }
+
+            .headco {
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                margin-top: 12px;
+                position: relative;
+                gap: 35%
+            }
+
+            .headco img {
+                width: 50px;
+                position: relative;
+            }
+            </style>
+            <div id="Prestasi" class="modal" on-touchstart="handleTouchStart" on-touchmove="handleTouchMove" on-touchend="handleTouchEnd">
+                <div class="modal-content">
+                    <div class="swipe-indicator"></div>
+                    <div class="headco">
+                        <button class="close-button" on-click="closeModal">&#215;</button>
+                        <img src="../logo/ukmp-logo-144x144.png"/>
+                    </div>
+                    <kartu-pkm></kartu-pkm>
+                </div>
+            </div>
+        `
+    }
+}
+
+class PKM extends PolymerElement {
+    static get template() {
+        return html`
+        `
+    }
+}
+
+class CardPres extends PolymerElement {
+    static get template() {
+        return html`
+        <style>
+        :host {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .modal {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        
+        .modal-content {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translate(-50%);
+            background-color: #fff;
+            padding: 10px;
+            width: 340px;
+            border-radius: 30px;
+        }
+        .close-button {
+            position: relative;
+            top: 50%;
+            left: 0;
+            width: 24px;
+            height: 24px;
+            border: none;
+            background-color: transparent;
+            font-size: 18px;
+            color: #999999;
+            cursor: pointer;
+            font-size: 28px;
+        }
+
+        .swipe-indicator {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 8px;
+            background-color: #cccccc;
+            border-radius: 40px;
+        }
+
+        .header-prestasi {
+            display: flex;
+            align-items: center;
+            margin-top: 12px;
+            position: relative;
+        }
+
+        image-component {
+            width: 35px;
+        }
+
+        .body-prestasi {
+            display: block;
+        }
+        </style>
+        <div id="Account" class="modal" on-touchstart="handleTouchStart" on-touchmove="handleTouchMove" on-touchend="handleTouchEnd">
+            <div class="modal-content">
+                <div class="swipe-indicator"></div>
+                <div class="header-prestasi">
+                    <div class="profile-prestasi>
+                        <image-component style$="background-image: url([[backgroundImage]]);"></image-component>
+                        <ukmp-text text$="[[title]]">[[title]]</ukmp-text>
+                    </div>
+                    <button class="close-button" on-click="closeModal">&#215;</button>
+                </div>
+                <div class="body-prestasi">
+                    <ukmp-text text$="[[namaOrang]]">[[namaOrang]]</ukmp-text>
+                    <ukmp-text text$="[[jenisPrestasi]]">[[jenisPrestasi]]</ukmp-text>
+                    <ukmp-text text$="[[tahunPrestasi]]">[[tahunPrestasi]]</ukmp-text>
+                    <ukmp-text text$="[[juaraPrestasi]]">[[juaraPrestasi]]</ukmp-text>
+                </div>
+            </div>
+        </div>
+      `;
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        const ukmpStory = this.closest('ukmp-story');
+        if (ukmpStory) {
+            this.namaOrang = ukmpStory.dataset.namaOrang || '';
+            this.jenisPrestasi = ukmpStory.dataset.jenisPrestasi || '';
+            this.tahunPrestasi = ukmpStory.dataset.tahunPrestasi || '';
+            this.juaraPrestasi = ukmpStory.dataset.juaraPrestasi || '';
+        }
+    }
+
+    static get properties() {
+        return {
+            backgroundImage: {
+                type: String,
+                value: '',
+            },
+            title: {
+                type: String,
+                value: '',
+            },
+            namaOrang: {
+                type: String,
+                value: '',
+            },
+            jenisPrestasi: {
+                type: String,
+                value: '',
+            },
+            tahunPrestasi: {
+                type: String,
+                value: '',
+            },
+            juaraPrestasi: {
+                type: String,
+                value: '',
+            },
+        };
+    }
+
+    closeModal() {
+        this.style.display = 'none';
+    }
+}
+customElements.define('arunika-prestasi-detail', CardPres);
+
+class DownloadList extends PolymerElement {
+    static get template() {
+        return html`
+        <style>
+        .card {
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+          width: 300px;
+          padding: 20px;
+          margin: 20px;
+          background-color: #fff;
+        }
+    
+        .card-title {
+          font-size: 20px;
+          font-weight: bold;
+          margin-bottom: 10px;
+          display: contents;
+        }
+    
+        .card-body {
+          padding: 10px 0;
+        }
+    
+        .card-footer {
+          margin-top: 20px;
+          text-align: right;
+        }
+    
+        .share-button {
+          background-color: #007bff;
+          color: #fff;
+          border: none;
+          border-radius: 4px;
+          padding: 10px 20px;
+          font-size: 16px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+        }
+    
+        .share-button:hover {
+          background-color: #0056b3;
+        }
+    
+        .iframe-container {
+          position: relative;
+          overflow: hidden;
+          padding-top: 56.25%; /* 16:9 aspect ratio (change this value to adjust the height) */
+        }
+    
+        .iframe-container iframe {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
+
+        .dokument {
+            display: flex;
+            align-items: center;
+            gap: 5%;
+        }
+
+        .dokument img {
+            width: 35px;
+        }
+
+        .dokument-head {
+            display: flex;
+            align-items: center;
+            gap: 5%;
+        }
+
+        .dokument img {
+            width: 35px;
+        }
+
+        .dokument-head image-component {
+            width: 35px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .card {
+                background-color: black;
+                color: white;
+            }
+            .share-button {
+                background-color: #161b22;
+                color: #f4f4f4;
+            }
+        }
+      </style>
+
+        <div class="dokument-head">
+            <image-component src="https://ukmpapps.web.app/apps/6.png" alt=""></image-component>
+            <div class="card-title">File untuk [[username]], Untuk diketahui lebih lanjut</div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <div class="iframe-container">
+                    <iframe src="https://www.example.com" frameborder="0" allowfullscreen></iframe>
+                </div>
+            </div>
+            <div class="dokument">
+                <img class="pdf" src="./logo/pdf-dark.png" />
+                <div class="card-title">SK Kepengurusan</div>
+            </div>
+            <div class="card-footer">
+                <button class="share-button" on-click="shareLink" aria-labelledby="Share" title="Share">Bagikan</button>
+            </div>
+        </div>
+    `;
+    }
+    static get properties() {
+        return {
+            username: {
+                type: String,
+                value: ''
+            }
+        };
+    }
+    shareLink() {
+        // Mengambil URL halaman saat ini
+        const currentURL = window.location.href;
+
+        // Melakukan tindakan berbagi link menggunakan API navigator.share
+        if (navigator.share) {
+            navigator.share({
+                url: currentURL
+            })
+                .then(() => {
+                    console.log('Berhasil membagikan link');
+                })
+                .catch((error) => {
+                    console.error('Gagal membagikan link', error);
+                });
+        } else {
+            console.log('API berbagi tidak didukung di browser ini');
+        }
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.querySelector('html').setAttribute('dark-theme', '');
+            document.body.style.backgroundColor = '#0d111';
+            document.body.style.color = '#f4f4f4';
+
+            // Ubah src image-component cloud menjadi path gambar tema gelap
+            const cloudImageComponent = this.shadowRoot.querySelector('.pdf');
+            if (cloudImageComponent) {
+                cloudImageComponent.setAttribute('src', './logo/pdf.png');
+            }
+
+        }
+        // Check if user is logged in
+        const loggedIn = localStorage.getItem('loggedIn');
+        const username = localStorage.getItem('username');
+
+        if (!loggedIn || !username) {
+            // Redirect to login page if not logged in
+            window.location.href = '/login.html';
+        } else {
+            this.username = username;
+
+            // Retrieve user data from Web Storage
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const user = users.find(u => u.username === username);
+
+            if (user) {
+                this.department = user.department;
+            }
+        }
+    }
+}
+
+customElements.define('arunika-dokument', DownloadList);
+
+class ArunikaContentView extends PolymerElement {
+    static get template() {
+        return html`
+      <style>
+      :host {
+        display: block;
+        position: absolute;
+        width: 100%;
+        top: 0;
+        overflow: hidden;
+      }
+
+      #carousel {
+        display: flex;
+        width: 100%;
+        transform: translateX(-0%);
+        transition: transform 0.3s ease;
+        position: fixed;
+        top: 10%;
+      }
+
+      .carousel-item {
+        flex: 0 0 32.2%;
+        height: 200px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+        background-color: #f1f1f1;
+        color: #333;
+        font-size: 24px;
+        margin-right: 10px; /* Menambahkan jarak antara slide */
+        border-radius: 10px; /* Menambahkan border-radius */
+      }
+
+      .carousel-item:last-child {
+        margin-left: 6px; /* Menghapus margin-right pada slide terakhir */
+      }
+      .content {
+        align-items: center;
+        justify-content: space-between;
+      }
+      
+      .image {
+        flex: 1;
+        text-align: right;
+        margin-right: 20px;
+      }
+      
+      .image img {
+        max-width: 100%;
+        height: auto;
+      }
+
+      .text {
+        text-align: left;
+        position: absolute;
+        z-index: 1;
+        flex-direction: column;
+        bottom: 35px;
+        display: flex;
+        width: 20%;
+        height: 40%
+      }
+
+      .modal-button {
+        background-color: #fff;
+        color: #0f0f0f;
+        padding: 10px 0px;
+        border: none;
+        border-radius: 100px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-right: 10px;
+        margin-top: 10px; /* Jarak atas button */
+    }
+
+    ukmp-text {
+        margin-bottom: 10px; /* Jarak bawah ukmp-text */
+      }
+      
+      
+      @media (prefers-color-scheme: dark) {
+        .carousel-item {
+            background-color: transparent;
+            color: #f4f4f4;
+        }
+        .modal-button {
+            background-color: #0f0f0f;
+            color: #fff;
+            padding: 10px 0px;
+            border: none;
+            border-radius: 100px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-right: 10px;
+            margin-top: 10px; /* Jarak atas button */
+        }
+      }
+      </style>
+
+      <div id="carousel" class="carousel">
+        <div class="carousel-item">
+            <div class="text">
+                <ukmp-text text="Upgrading 2023">[[JudulGambar]]</ukmp-text>
+                <ukmp-text text="Kegiatan Upgrading adalah kegiatan...">[[KeteranganGambar]]</ukmp-text>
+                <button class="modal-button"><ukmp-text link-text="Ketahui Lebih Lanjut" text="" href="https://ukmpapps.web.app/"></ukmp-text></button>
+            </div>
+            <div class="content">
+                <image-component src="/../../images/day1/IMG_0052.JPG" alt="Gambar 1" show-sinematik></image-component>
+            </div>
+        </div>
+        <div class="carousel-item">            
+            <div class="text">
+                <ukmp-text text="Upgrading 2023">[[JudulGambar]]</ukmp-text>
+                <ukmp-text text="Kegiatan Upgrading adalah kegiatan...">[[KeteranganGambar]]</ukmp-text>
+                <button class="modal-button"><ukmp-text link-text="Ketahui Lebih Lanjut" text="" href="https://ukmpapps.web.app/"></ukmp-text></button>
+            </div>        
+            <div class="content">
+                <image-component src="/../../images/day2/IMG_0217.JPG" alt="Gambar 1" show-sinematik></image-component>
+            </div>
+        </div>
+        <div class="carousel-item">            
+            <div class="text">
+                <ukmp-text text="Upgrading 2023">[[JudulGambar]]</ukmp-text>
+                <ukmp-text text="Kegiatan Upgrading adalah kegiatan...">[[KeteranganGambar]]</ukmp-text>
+                <button class="modal-button"><ukmp-text link-text="Ketahui Lebih Lanjut" text="" href="https://ukmpapps.web.app/"></ukmp-text></button>
+            </div>    
+            <div class="content">
+                <image-component src="/../../images/day2/IMG_0217.JPG" alt="Gambar 1" show-sinematik></image-component>
+            </div>
+        </div>
+      </div>
+    `;
+    }
+
+    static get is() {
+        return 'carousel-component';
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.initializeCarousel();
+    }
+    navigateToLink(event) {
+        const button = event.target;
+        const link = button.getAttribute('data-link');
+        if (link) {
+            window.location.href = link;
+        }
+    }
+
+    initializeCarousel() {
+        const carousel = this.shadowRoot.getElementById('carousel');
+        const carouselItems = carousel.getElementsByClassName('carousel-item');
+        const numItems = carouselItems.length;
+        const itemWidthPercentage = 100 / numItems;
+
+        carousel.style.width = `${numItems * 100}%`;
+
+        Array.from(carouselItems).forEach((item) => {
+            item.style.width = `${itemWidthPercentage}%`;
+        });
+
+        let currentItem = 0;
+
+        setInterval(() => {
+            currentItem = (currentItem + 1) % numItems;
+            const translateX = `-${currentItem * itemWidthPercentage}%`;
+            carousel.style.transform = `translateX(${translateX})`;
+        }, 3000);
+    }
+}
+customElements.define("arunika-content-view", ArunikaContentView);
+
+class UKMPKartuDepar extends PolymerElement {
+    static get template() {
+        return html`
+        <style>
+          :host {
+            display: block;
+            background-color: var(--card-background-color);
+            color: var(--card-text-color);
+            border-radius: 10px;
+            padding: 0px;
+            height: max-content;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2),
+                 0px 6px 10px rgba(0, 0, 0, 0.1);
+          }
+  
+          .card {
+            background-color: #ffffff;
+            color: #000000;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2),
+                        0px 6px 10px rgba(0, 0, 0, 0.1);
+          }
+          
+          .card-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 10px;
+          }
+          
+          .card-body {
+            font-size: 9px;
+            margin-top: 0;
+          }
+          
+          .card-link {
+            color: var(--card-link-color);;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 11px;
+            animation: shake 1.5s;
+          }
+          
+          .card:hover {
+            animation: up-down 1s ease-in-out infinite;
+          }
+          
+          @keyframes up-down {
+            0%, 100% {
+              transform: translateY(0);
+            }
+            50% {
+              transform: translateY(-10px);
+            }
+          }
+                  
+          @keyframes shake {
+            0% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+          }        
+  
+          @media (prefers-color-scheme: dark) {
+            .card-link {
+              color: #ffff;
+              font-weight: bold;
+              text-decoration: none;
+            }
+            .card {
+              background: #1A202C;
+              color: #f4f4f4;
+            }
+          }
+  
+        </style>
+  
+        <div class="card">
+          <h3 class="card-header">[[title]]</h3>
+          <p class="card-body">[[description]]</p>
+          <a href="[[url]]" class="card-link">Lihat Selengkapnya</a>
+        </div>
+      `;
+    }
+
+    static get properties() {
+        return {
+            title: String,
+            description: String,
+            url: String,
+            loading: {
+                type: Boolean,
+                value: true,
+            }
+        }
+    }
+}
+
+customElements.define("arunika-kartu-dep", UKMPKartuDepar);
+
+class ListDepartement extends PolymerElement {
+    static get template() {
+        return html`
+        <style>
+        .card-grid {
+            --card-grid-display: grid;
+            --card-grid-columns: repeat(4, 1fr);
+            --card-grid-rows: repeat(2, 1fr);
+            --card-grid-gap: 20px;
+            display: var(--card-grid-display);
+            grid-template-columns: var(--card-grid-columns);
+            grid-template-rows: var(--card-grid-rows);
+            grid-gap: var(--card-grid-gap);
+          }      
+        </style>
+        <ukmp-header-card class="header"></ukmp-header-card>
+        <div class="card-grid">
+          <arunika-kartu-dep title="PH" description="PH" url="./ph" skeleton on-click="openPh"></arunika-kartu-dep>
+          <arunika-kartu-dep title="HRD" description="HRD" url="./hrd" skeleton></arunika-kartu-dep>
+          <arunika-kartu-dep title="DD" description="DD" url="./dd" skeleton></arunika-kartu-dep>
+          <arunika-kartu-dep title="COMDEV" description="COMDEV" url="./cdv" skeleton></arunika-kartu-dep>
+          <arunika-kartu-dep title="STD" description="STD" url="./std" skeleton></arunika-kartu-dep>
+          <arunika-kartu-dep title="PRD" description="PRD" url="./prd" skeleton></arunika-kartu-dep>
+          <arunika-kartu-dep title="Karya" description="Karya" url="./karya" skeleton></arunika-kartu-dep>
+          <arunika-kartu-dep title="Karya" description="Karya" url="./red" skeleton></arunika-kartu-dep>
+        </div>
+    `
+    }
+
+}
+
+customElements.define("arunika-list-departement", ListDepartement)
+
+class DeksripsiStory extends PolymerElement {
+    static get template() {
+        return html`
+          <style>
+            .modal {
+                display: none;
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                width: 100%;
+                height: max-content;
+                z-index: 999;
+                transform: translate(-50%);
+            }
+            
+            .modal-content {
+                position: absolute;
+                bottom: 0px;
+                left: 50%;
+                transform: translate(-50%);
+                background-color: #fff;
+                padding: 10px;
+                width: 85%;
+                border-radius: 20px;
+            }
+
+            .close-button {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                width: 24px;
+                height: 24px;
+                border: none;
+                background-color: transparent;
+                font-size: 18px;
+                color: #999999;
+                cursor: pointer;
+                font-size: 28px;
+                z-index: 1;
+            }
+            
+            .close-button:hover {
+                color: #555555;
+            }
+
+            .headco {
+                display: flex;
+                align-items: center;
+                gap: 5%;
+            }
+
+            .chilpar {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin: 0;
+            }
+
+            .prchilpar {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .button-container{
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin: 20px;
+            }
+
+            .button-container h2 {
+                margin: 0;
+            }
+
+            .button-container h2 {
+                margin: 0;
+                color: #666666;
+            }
+
+            .button-container .list-item {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin: 0;
+            }
+
+            .button-container .list-item image-component{
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+            }
+
+            .modal-button {
+                background-color: #0f0f0f;
+                color: #fff;
+                padding: 10px 0px;
+                border: none;
+                border-radius: 100px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+            }
+
+            .modal-button-li {
+                background-color: #fff;
+                color: #0f0f0f;
+                padding: 10px 0px;
+                border: none;
+                border-radius: 100px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                right: 0
+            }
+            
+            .chil-button-prev {
+                background-color: black;
+                color: #f0f0f0;
+                padding: 5px;
+                border: none;
+                border-radius: 45px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                right: 0;
+                width: 35px;
+            }
+            
+            .chil-button-next {
+                background-color: black;
+                color: #f0f0f0;
+                padding: 5px;
+                border: none;
+                border-radius: 45px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                left: 0;
+                width: 35px;
+            }
+
+            .text-wrapper {
+              font-size: 24px;
+              font-weight: bold;
+              margin-bottom: 10px;
+            }
+            
+            .centered-button {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background-color: transparent;
+                background-image: url("/../../images/HRD.jpg");
+                background-repeat: no-repeat;
+                background-size: 50px;
+                border: none;
+            }
+            .hidden {
+                display: none;
+            }
+            
+            @media (prefers-color-scheme: dark) {
+                .modal-content {
+                    background: #161b22;
+                    color: #f4f4f4;
+                }
+                .modal-button-li {
+                    background-color: #161b22;
+                    color: #0f0f0f;
+                }
+
+            }
+          </style>
+
+            <div class="profile-picture">
+                <button class="centered-button" on-click="openModal" aria-labelledby="Profile Departement" title="Profile Departement"></button>
+            </div>
+      
+            <div id="modal" class="modal" on-touchstart="handleTouchStart" on-touchmove="handleTouchMove" on-touchend="handleTouchEnd">
+                <div class="modal-content">
+                    <div class="headco">
+                        <button class="close-button" on-click="closeModal">&#215;</button>
+                        <ukmp-text class="text-wrapper" text="[[namaDepartemen]]">[[namaDepartemen]]</ukmp-text>
+                    </div>
+                    <div class="list-item">
+                        <div class="site-header">
+                            <div class="chips-nav">
+                                <button aria-labelledby="mundur" aria-label="mundur" title="mundur" class="chips-nav__prev"><i
+                                        class="fas fa-chevron-left"></i></button>
+                                <button aria-labelledby="maju" aria-label="maju" title="maju" class="chips-nav__next"><i
+                                        class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                        <span>
+                            <br>
+                        </span>
+                        <span>
+                            <br>
+                        </span>
+                        <ukmp-text class="text-wrapper-justity" text="Kegiatan Upgrading adalah kegiatana peningkatan mutu, pengetahuan dan ilmu berorganisasi dalam suatu organisasi">Kegiatan Upgrading adalah kegiatana peningkatan mutu, pengetahuan dan ilmu berorganisasi dalam suatu organisasi</ukmp-text>
+                        <span>
+                            <br>
+                        </span>
+                        <ukmp-text class="text-wrapper-justity" text="Tema Kegiatan Upgrading ini yaitu Melangkah Dalam Kolaborasi Untuk Meningkatkan Harmonisasi Fungsionaris UKM Penelitian UNNES">Tema Kegiatan Upgrading ini yaitu Melangkah Dalam Kolaborasi Untuk Meningkatkan Harmonisasi Fungsionaris UKM Penelitian UNNES</ukmp-text>
+                    </div>
+                    <div class="chilpar">
+                        <div class="headco">
+                            <ukmp-text class="text-wrapper" text="Anggota HRD">Anggota HRD</ukmp-text>
+                            <button class="modal-button-li" data-link="https://www.instagram.com/p/Cq1_5bUJbOh/" on-click="navigateToLink"><ukmp-text text="Lihat Selengkapnya">Lihat Selengkapnya</ukmp-text></button>
+                        </div>    
+                        <div class$="prchilpar {{travelAppSplashClass}}">
+                            <image-component src="/../../images/Zikri Wildan Setiadi_HRD.JPG"></image-component>
+                            <image-component src="/../../images/Nina Martian Ningsih _HRD.JPG"></image-component>
+                            <button class="button chil-button-prev" on-click="showHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                        <div class$="prchilpar {{homeAppClass}}"">
+                            <image-component src="/../../images/Abrar Rizq_HRD.jpg"></image-component>
+                            <image-component src="/../../images/Puti Sekar Arginingrum_HRD.png"></image-component>
+                            <button class="button chil-button-next" on-click="prevHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                            <button class="button chil-button-prev" on-click="prevHome2">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                        <div class$="prchilpar {{homeAppClassRe}}"">
+                            <image-component src="/../../images/BENI AJI SUBEKTI_HRD 2.jpeg"></image-component>
+                            <image-component src="/../../images/Rikha Fitriani Umayatun_HRD.jpeg"></image-component>
+                            <button class="button chil-button-next" on-click="prevHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    static get properties() {
+        return {
+            homeAppClass: {
+                type: String,
+                value: "hidden"
+            },
+            homeAppClassRe: {
+                type: String,
+                value: "hidden"
+            },
+            travelAppSplashClass: {
+                type: String,
+                value: ""
+            },
+            namaDepartemen: {
+                type: String,
+                value: '',
+                reflectToAttribute: true,  // added for attribute-property binding
+                observer: '_namaDepartemenChanged'  // added observer
+            },
+            deskripsiDepartemen: {
+                type: String,
+                value: '',
+                reflectToAttribute: true,  // added for attribute-property binding
+                observer: '_deskripsiDepartemenChanged'  // added observer
+            },
+            imageSrc: String,
+        };
+    }
+
+    // observer function for namaDepartemen property
+    _namaDepartemenChanged(newVal) {
+        // code to handle the updated value of namaDepartemen
+        const ukmpTextElement = this.shadowRoot.querySelector('ukmp-text');
+        if (ukmpTextElement) {
+            ukmpTextElement.setAttribute('text', newVal);
+        }
+    }
+
+    _deskripsiDepartemenChanged(hallo) {
+        // code to handle the updated value of namaDepartemen
+        const Hal = this.shadowRoot.querySelector('ukmp-text #deskripsi');
+        if (Hal) {
+            Hal.setAttribute('text', hallo);
+        }
+    }
+
+    showHome() {
+        this.homeAppClass = ""; // Menghapus kelas "hidden" pada homeAppClass
+        this.travelAppSplashClass = "hidden"; // Menambahkan kelas "hidden" pada travelAppSplashClass
+        this.homeAppClassRe = "hidden";
+    }
+
+    prevHome() {
+        this.homeAppClass = "hidden"; // Menghapus kelas "hidden" pada homeAppClass
+        this.homeAppClassRe = "hidden";
+        this.travelAppSplashClass = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    prevHome2() {
+        this.homeAppClassRe = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+        this.travelAppSplashClass = "hidden"; // Menghapus kelas "hidden" pada homeAppClass
+        this.homeAppClass = "hidden"; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.namaDepartemen = this.getAttribute("nama-departemen");
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.querySelector('html').setAttribute('dark-theme', '');
+            document.body.style.backgroundColor = '#0d111';
+            document.body.style.color = '#f4f4f4';
+        }
+        this.deksripsiDepartemen = this.getAttribute("deskripsi-departemen");
+        this._namaDepartemenChanged(this.namaDepartemen);  // initial call to the observer function
+        this._deskripsiDepartemenChanged(this.deksripsiDepartemen);  // initial call to the observer function
+        this.modal = this.shadowRoot.getElementById("modal");
+        this.moni = this.shadowRoot.getElementById("moni");
+        this.addEventListener("button-clicked", this.handleButtonClick);
+        // Periksa apakah pengguna sudah mengklik Button 1 sebelumnya
+        const button1Clicked = localStorage.getItem('button1Clicked');
+
+        if (button1Clicked) {
+            // Jika pengguna telah mengklik Button 1 sebelumnya,
+            // langsung tampilkan halaman home-app dan sembunyikan travel-app-splash
+            this.showHome();
+        } else if (button1Clicked) {
+            this.prevHome();
+        } else if (button1Clicked) {
+            this.prevHome2();
+        } else {
+            // Jika pengguna belum mengklik Button 1 sebelumnya,
+            // tampilkan travel-app-splash dan sembunyikan home-app
+            this.showTravelAppSplash();
+        }
+    }
+
+    navigateToLink(event) {
+        const button = event.target;
+        const link = button.getAttribute('data-link');
+        if (link) {
+            window.location.href = link;
+        }
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.removeEventListener("button-clicked", this.handleButtonClick);
+    }
+
+    openModal() {
+        this.modal = this.shadowRoot.getElementById("modal");
+        this.modal.style.display = "block";
+        this.modalStartPosition = 0;
+        this.modal.addEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.addEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.addEventListener("touchend", this.handleTouchEnd.bind(this));
+    }
+
+    handleTouchStart(e) {
+        this.startY = e.touches[0].pageY;
+        this.modalStartPosition = this.modal.getBoundingClientRect().top;
+    }
+
+    handleTouchMove(e) {
+        const deltaY = e.touches[0].pageY - this.startY;
+        this.moveModal(deltaY);
+    }
+
+    handleTouchEnd(e) {
+        const deltaY = e.changedTouches[0].pageY - this.startY;
+        if (deltaY > 100) {
+            this.closeModal();
+        } else {
+            this.resetModalPosition();
+        }
+    }
+
+    moveModal(deltaY) {
+        this.modal.style.transform = `translateY(${deltaY}px)`;
+        this.moni.style.transform = `translateY(${deltaY}px)`
+    }
+
+    resetModalPosition() {
+        this.modal.style.transform = "";
+        this.moni.style.transform = "";
+    }
+
+    closeModal() {
+        this.modal.style.display = "none";
+        this.modal.removeEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.removeEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.removeEventListener("touchend", this.handleTouchEnd.bind(this));
+    }
+
+    handleButtonClick(e) {
+        const button = e.target;
+        console.log("Button clicked:", button.textContent);
+    }
+}
+customElements.define("deskripsi-story", DeksripsiStory);
+
+class UkmpContent extends PolymerElement {
+    static get template() {
+        return html`
+    <style>
+      :host {
+        display: block;
+        box-sizing: border-box;
+      }
+      #container {
+        overflow-y: auto;
+      }
+      @media only screen and (max-width: 600px) {
+        :host {
+          display: flex;
+          flex-direction: column;
+        }
+        #container {
+          padding: 8px;
+          margin-bottom: 16px;
+        }
+      }
+      @media only screen and (max-width: 400px) {
+        #container {
+          max-width: 100%;
+        }
+        ::slotted(*) {
+          font-size: 16px;
+        }
+      }
+    </style>
+    <div id="container">
+      <slot name="kartu-harbar"></slot>
+      <slot name="kartu-upgrading"></slot>
+      <slot name="kartu-pab"></slot>
+      <slot name="kartu-hutf"></slot>
+      <slot name="kartu-da"></slot>
+      <slot name="kartu-prestasi"></slot>
+      <slot></slot>
+    </div>
+  `;
+    }
+}
+customElements.define("ukmp-content", UkmpContent);
+
+class UKMPKartu extends PolymerElement {
+    static get template() {
+        return html`
+      <style>
+        :host {
+          display: block;
+        }
+        .card {
+          background: #ffffff;
+          color: #000000;
+          border-radius: 10px;
+          padding: 20px;
+          box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2),
+               0px 6px 10px rgba(0, 0, 0, 0.1);
+        }
+  
+        @media (prefers-color-scheme: dark) {
+          .card {
+            background: #161b22;
+            color: #f4f4f4;
+          }
+        }
+  
+        .card:hover {
+          transform: translateY(-5px);
+        }
+  
+        .card-header {
+          font-size: 28px;
+          font-weight: bold;
+          margin-top: 0;
+          margin-bottom: 10px;
+        }
+        .card-body {
+          font-size: 16px;
+          margin-top: 0;
+        }
+        .card-link {
+          color: #BFBFBF;
+          font-weight: bold;
+          text-decoration: none;
+        }
+  
+        .card-link:hover {
+          animation: shake 0.5s;
+        }
+       
+        @keyframes shake {
+          0% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          50% { transform: translateX(5px); }
+          75% { transform: translateX(-5px); }
+          100% { transform: translateX(0); }
+        }
+       
+      </style>
+      <div class="card">
+        <h3 class="card-header">[[title]]</h3>
+        <p class="card-body">[[description]]</p>
+        <a href="[[url]]" class="card-link">Lihat Selengkapnya</a>
+      </div>
+    `
+    }
+    static get properties() {
+        return {
+            title: String,
+            description: String,
+            url: String
+        }
+    }
+}
+customElements.define("ukmp-kartu", UKMPKartu);
+
+class UKMPKartuSosPres extends PolymerElement {
+    constructor() {
+        super();
+        this.addEventListener("mouseenter", this.handleMouseEnter.bind(this));
+        this.addEventListener("mouseleave", this.handleMouseLeave.bind(this));
+        this.addEventListener('click', this.showPrestasiDetail)
+        this.addEventListener('dbclick', this.cancelPrestasiDetail)
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this._addShadowBox();
+        this.modal = this.shadowRoot.getElementById("Prestasi");
+        this.modal.addEventListener("click", this.handleOutsideClick.bind(this));
+    }
+
+    showPrestasiDetail() {
+        const modal = this.shadowRoot.querySelector("#Prestasi");
+        modal.classList.add("modal");
+        document.documentElement.style.overflowY = "hidden"; // Menambahkan gaya overflow-y: hidden pada tag <html>
+    }
+
+    cancelPrestasiDetail() {
+        const modal = this.shadowRoot.querySelector("#Prestasi");
+        modal.classList.remove("modal");
+        document.documentElement.style.overflowY = ""; // Menambahkan gaya overflow-y: hidden pada tag <html>
+        this.closeModal();
+    }
+    handleOutsideClick(event) {
+        if (event.target === this.modal) {
+            this.closeModal();
+            this.cancelPrestasiDetail();
+        }
+    }
+
+    handleMouseEnter() {
+        const modal = this.shadowRoot.querySelector("#Prestasi");
+        const h3 = this.shadowRoot.querySelector(".card-header");
+        const p = this.shadowRoot.querySelector(".card-body");
+        const a = this.shadowRoot.querySelector(".card-link");
+        modal.classList.add("modal")
+        h3.classList.add("show");
+        p.classList.add("show");
+        a.classList.add("show");
+        document.documentElement.style.overflowY = "hidden"; // Menambahkan gaya overflow-y: hidden pada tag <html>
+    }
+
+    handleMouseLeave() {
+        const modal = this.shadowRoot.querySelector("#Prestasi");
+        const h3 = this.shadowRoot.querySelector(".card-header");
+        const p = this.shadowRoot.querySelector(".card-body");
+        const a = this.shadowRoot.querySelector(".card-link");
+        h3.classList.remove("show");
+        modal.classList.remove("modal")
+        p.classList.remove("show");
+        a.classList.remove("show");
+        document.documentElement.style.overflowY = ""; // Menambahkan gaya overflow-y: hidden pada tag <html>
+        this.closeModal();
+    }
+
+    static get template() {
+        return html`
+        <style>
+          :host([modal]:not([nama-orang]):not([jenis-prestasi]):not([tahun-prestasi]):not([juara-prestasi])) #Prestasi {
+            display: none;
+          }
+
+          :host {
+            display: block;
+            --card-height: 170px;
+            --card-width: calc(var(--card-height) / 1.5);
+            --card-header-color: #1A202C;
+            --card-body-color: #1A202C;
+            --card-link-color: #1A202C;
+            --card-dark-background-color: #161b22;
+            --card-dark-color: #f4f4f4;
+            --card-header-color-black: #000000;
+            --card-body-color-black: #000000;
+            --card-link-color-black: #000000;
+            --card-skeleton-color: #f4f4f4; /* Warna skeleton */
+            --card-skeleton-color-alt: #e0e0e0; /* Warna skeleton alternatif */
+          }
+            
+          .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            position: relative;
+            width: var(--card-width);
+            height: var(--card-height);
+            background-color: var(--card-skeleton-color, #f4f4f4); /* Tambahkan background-color skeleton */
+            box-shadow: var(--card-box-shadow, none);
+            background-image: var(--card-background-image, url(""));
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center center;
+            color: var(--card-color, #000000);
+            border-radius: 10px;
+            padding: 20px;
+            animation: skeleton-animation 1.5s infinite linear; /* Tambahkan animasi skeleton */
+          }
+          
+          @keyframes skeleton-animation {
+            0% {
+              background-color: var(--card-skeleton-color, #f4f4f4);
+            }
+            50% {
+              background-color: var(--card-skeleton-color-alt, #e0e0e0); /* Tambahkan warna skeleton alternatif */
+            }
+            100% {
+              background-color: var(--card-skeleton-color, #f4f4f4);
+            }
+          }
+  
+          .card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: inherit;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center center;
+            filter: blur(10px);
+            z-index: -1;
+          }
+
+          #Prestasi {
+            display: none;
+          }
+
+          #Prestasi.modal {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        
+        .modal-content {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translate(-50%);
+            background-color: #fff;
+            padding: 10px;
+            width: 340px;
+            border-radius: 30px;
+        }
+
+        .indentitas-prestasi {
+            display: flex;
+            align-items: center;
+            width: max-content;
+            position: relative;
+            left: -50%;
+            transform: translateX(50%);
+        }
+
+        .swipe-indicator {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 8px;
+            background-color: #cccccc;
+            border-radius: 40px;
+        }
+
+        .header-prestasi {
+            display: flex;
+            align-items: center;
+            margin-top: 12px;
+            position: relative;
+            justify-content: space-between;
+            height: 60px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+        
+          th, td {
+            padding: 10px;
+            text-align: left;
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+            color: white;
+          }
+
+          tr {
+            background-color: #08487b;
+          }
+        
+          th {
+            text-align: center;
+            background-color: #0056b3;
+          }
+
+        image-component {
+            width: 50px;
+            height: 50px;
+            background-size: cover;
+        }
+
+        .tahun {
+            color: black;
+        }
+
+        .body-prestasi {
+            display: block;
+        }
+  
+          @media (prefers-color-scheme: dark) {
+            .card {
+              --card-color: var(--card-dark-color, #f4f4f4);
+              --card-background-color: var(--card-dark-background-color, #161b22);
+              --card-background-image: var(--card-dark-background-image, url("") 0.1);
+              box-shadow: var(--card-box-shadow, none);
+            }
+
+            .tahun {
+                color: white;
+            }
+
+            .modal-content {
+                background-color: #161b22;
+            }
+
+            th, td {
+                color: white;
+            }
+          }
+  
+          .card:hover {
+            transform: translateY(-5px);
+          }
+          
+          .card-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--card-header-color, #1A202C);
+          }
+          
+          .card-body {
+            font-size: 12px;
+            margin-top: 0;
+            color: var(--card-body-color, #1A202C);
+          }
+          
+          .card-link {
+            color: var(--card-link-color, #BFBFBF);
+            font-weight: bold;
+            text-decoration: none;
+            color: var(--card-link-color, #1A202C);
+            font-size: 13px;
+          }
+          
+          .card-link:hover {
+            animation: shake 0.5s;
+          }
+          
+          @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+          }
+        </style>
+        <div id="Prestasi" on-touchstart="handleTouchStart" on-touchmove="handleTouchMove" on-touchend="handleTouchEnd">
+            <div class="modal-content">
+                <div class="swipe-indicator"></div>
+                <div class="header-prestasi">
+                <image-component style$="background-image: url([[backgroundImage]]);"></image-component>
+                <div class="indentitas-prestasi">
+                    <image-component src="https://ukmpapps.web.app/apps/6.png" alt=""></image-component>
+                    <ukmp-text class="tahun" text$="Prestasi [[tahunPrestasi]]">[[title]]</ukmp-text>
+                </div>
+                </div>
+                <div class="body-prestasi">
+                <table>
+                    <tr>
+                    <th>Nama</th>
+                    <th>Jenis Prestasi</th>
+                    <th>Tahun Prestasi</th>
+                    <th>Juara Prestasi</th>
+                    </tr>
+                    <tr>
+                    <td>[[namaOrang]]</td>
+                    <td>[[jenisPrestasi]]</td>
+                    <td>[[tahunPrestasi]]</td>
+                    <td>[[juaraPrestasi]]</td>
+                    </tr>
+                </table>
+                </div>
+            </div>
+        </div>
+        <div class="card" style$="background-image: url([[backgroundImage]]);"> <!-- Hapus tanda kutip ganda ekstra di sini -->
+          <h3 class="card-header" style$="color: [[colorH]];">[[title]]</h3>
+          <p class="card-body" style$="color: [[colorP]];">[[description]]</p>
+          <a href="[[url]]" class="card-link" style$="color: [[colorA]];">Lihat Selengkapnya</a>
+        </div>
+      `;
+    }
+
+    static get properties() {
+        return {
+            title: String,
+            description: String,
+            url: String,
+            backgroundImage: {
+                type: String,
+                value: ""
+            },
+            colorH: {
+                type: String,
+                value: "default"
+            },
+            colorA: {
+                type: String,
+                value: "default"
+            },
+            colorP: {
+                type: String,
+                value: "default"
+            },
+            modal: {
+                type: Boolean,
+                value: false,
+                observer: '_modalChanged',
+            },
+            namaOrang: {
+                type: String,
+                value: '',
+            },
+            jenisPrestasi: {
+                type: String,
+                value: '',
+            },
+            tahunPrestasi: {
+                type: String,
+                value: '',
+            },
+            juaraPrestasi: {
+                type: String,
+                value: '',
+            },
+        }
+    }
+
+    handleTouchStart(e) {
+        this.startY = e.touches[0].pageY;
+        this.modalStartPosition = this.modal.getBoundingClientRect().top;
+    }
+
+    handleTouchMove(e) {
+        const deltaY = e.touches[0].pageY - this.startY;
+        this.moveModal(deltaY);
+    }
+
+    handleTouchEnd(e) {
+        const deltaY = e.changedTouches[0].pageY - this.startY;
+        if (deltaY > 100) {
+            this.closeModal();
+            this.resetModalPosition();
+        } else {
+            this.resetModalPosition();
+        }
+    }
+
+    moveModal(deltaY) {
+        this.modal.style.transform = `translateY(${deltaY}px)`;
+    }
+
+    resetModalPosition() {
+        this.modal.style.transform = "";
+    }
+
+
+    closeModal() {
+        const modal = this.shadowRoot.querySelector("#Prestasi");
+        modal.classList.remove("modal");
+        modal.removeEventListener("touchstart", this.handleTouchStart.bind(this));
+        modal.removeEventListener("touchmove", this.handleTouchMove.bind(this));
+        modal.removeEventListener("touchend", this.handleTouchEnd.bind(this));
+        document.documentElement.style.overflowY = ""; // Menghapus gaya overflow-y: hidden dari tag <html>
+    }
+
+    _modalChanged(modal) {
+    }
+
+    _addShadowBox() {
+        const cardElement = this.shadowRoot.querySelector(".card");
+        const imgElement = new Image();
+        imgElement.src = this.backgroundImage;
+        imgElement.addEventListener("load", () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = imgElement.width;
+            canvas.height = imgElement.height;
+            const context = canvas.getContext("2d");
+            context.drawImage(imgElement, 0, 0);
+
+            const imageData = context.getImageData(0, 0, imgElement.width, imgElement.height).data;
+            const numPixels = imgElement.width * imgElement.height;
+            let totalR = 0;
+            let totalG = 0;
+            let totalB = 0;
+
+            for (let i = 0; i < numPixels * 4; i += 4) {
+                totalR += imageData[i];
+                totalG += imageData[i + 1];
+                totalB += imageData[i + 2];
+            }
+
+            const avgR = Math.round(totalR / numPixels);
+            const avgG = Math.round(totalG / numPixels);
+            const avgB = Math.round(totalB / numPixels);
+
+            const avgColor = `rgb(${avgR}, ${avgG}, ${avgB})`;
+            const boxShadowValue = `0 0 50px ${avgColor}`;
+
+            cardElement.style.setProperty("--card-box-shadow", boxShadowValue);
+            cardElement.style.removeProperty("background-color"); // Hapus background-color skeleton setelah gambar dimuat
+        });
+    }
+}
+customElements.define("ukmp-story-prestasi", UKMPKartuSosPres);
+
+class UKMPKartuSos extends PolymerElement {
+    constructor() {
+        super();
+        this.addEventListener("mouseenter", this.handleMouseEnter.bind(this));
+        this.addEventListener("mouseleave", this.handleMouseLeave.bind(this));
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this._addShadowBox();
+    }
+
+    handleMouseEnter() {
+        const h3 = this.shadowRoot.querySelector(".card-header");
+        const p = this.shadowRoot.querySelector(".card-body");
+        const a = this.shadowRoot.querySelector(".card-link");
+        h3.classList.add("show");
+        p.classList.add("show");
+        a.classList.add("show");
+    }
+
+    handleMouseLeave() {
+        const h3 = this.shadowRoot.querySelector(".card-header");
+        const p = this.shadowRoot.querySelector(".card-body");
+        const a = this.shadowRoot.querySelector(".card-link");
+        h3.classList.remove("show");
+        p.classList.remove("show");
+        a.classList.remove("show");
+    }
+
+    static get template() {
+        return html`
+        <style>
+          :host {
+            display: block;
+            --card-height: 170px;
+            --card-width: calc(var(--card-height) / 1.5);
+            --card-header-color: #1A202C;
+            --card-body-color: #1A202C;
+            --card-link-color: #1A202C;
+            --card-dark-background-color: #161b22;
+            --card-dark-color: #f4f4f4;
+            --card-header-color-black: #000000;
+            --card-body-color-black: #000000;
+            --card-link-color-black: #000000;
+            --card-skeleton-color: #f4f4f4; /* Warna skeleton */
+            --card-skeleton-color-alt: #e0e0e0; /* Warna skeleton alternatif */
+          }
+            
+          .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            position: relative;
+            width: var(--card-width);
+            height: var(--card-height);
+            background-color: var(--card-skeleton-color, #f4f4f4); /* Tambahkan background-color skeleton */
+            box-shadow: var(--card-box-shadow, none);
+            background-image: var(--card-background-image, url(""));
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center center;
+            color: var(--card-color, #000000);
+            border-radius: 10px;
+            padding: 20px;
+            animation: skeleton-animation 1.5s infinite linear; /* Tambahkan animasi skeleton */
+          }
+          
+          @keyframes skeleton-animation {
+            0% {
+              background-color: var(--card-skeleton-color, #f4f4f4);
+            }
+            50% {
+              background-color: var(--card-skeleton-color-alt, #e0e0e0); /* Tambahkan warna skeleton alternatif */
+            }
+            100% {
+              background-color: var(--card-skeleton-color, #f4f4f4);
+            }
+          }
+  
+          .card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: inherit;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center center;
+            filter: blur(10px);
+            z-index: -1;
+          }
+  
+          @media (prefers-color-scheme: dark) {
+            .card {
+              --card-color: var(--card-dark-color, #f4f4f4);
+              --card-background-color: var(--card-dark-background-color, #161b22);
+              --card-background-image: var(--card-dark-background-image, url("") 0.1);
+              box-shadow: var(--card-box-shadow, none);
+            }
+          }
+  
+          .card:hover {
+            transform: translateY(-5px);
+          }
+          
+          .card-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--card-header-color, #1A202C);
+          }
+          
+          .card-body {
+            font-size: 12px;
+            margin-top: 0;
+            color: var(--card-body-color, #1A202C);
+          }
+          
+          .card-link {
+            color: var(--card-link-color, #BFBFBF);
+            font-weight: bold;
+            text-decoration: none;
+            color: var(--card-link-color, #1A202C);
+            font-size: 13px;
+          }
+          
+          .card-link:hover {
+            animation: shake 0.5s;
+          }
+          
+          @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+          }
+        </style>
+        <div class="card" style$="background-image: url([[backgroundImage]]);"> <!-- Hapus tanda kutip ganda ekstra di sini -->
+          <h3 class="card-header" style$="color: [[colorH]];">[[title]]</h3>
+          <p class="card-body" style$="color: [[colorP]];">[[description]]</p>
+          <a href="[[url]]" class="card-link" style$="color: [[colorA]];">Lihat Selengkapnya</a>
+        </div>
+      `;
+    }
+
+    static get properties() {
+        return {
+            title: String,
+            description: String,
+            url: String,
+            backgroundImage: {
+                type: String,
+                value: ""
+            },
+            colorH: {
+                type: String,
+                value: "default"
+            },
+            colorA: {
+                type: String,
+                value: "default"
+            },
+            colorP: {
+                type: String,
+                value: "default"
+            },
+            modal: {
+                type: Boolean,
+                value: false,
+                observer: '_modalChanged',
+            },
+            namaOrang: {
+                type: String,
+                value: '',
+            },
+            jenisPrestasi: {
+                type: String,
+                value: '',
+            },
+            tahunPrestasi: {
+                type: String,
+                value: '',
+            },
+            juaraPrestasi: {
+                type: String,
+                value: '',
+            },
+        }
+    }
+
+    handleTouchStart(e) {
+        this.startY = e.touches[0].pageY;
+        this.modalStartPosition = this.modal.getBoundingClientRect().top;
+    }
+
+    handleTouchMove(e) {
+        const deltaY = e.touches[0].pageY - this.startY;
+        this.moveModal(deltaY);
+    }
+
+    handleTouchEnd(e) {
+        const deltaY = e.changedTouches[0].pageY - this.startY;
+        if (deltaY > 100) {
+            this.closeModal();
+            this.resetModalPosition();
+        } else {
+            this.resetModalPosition();
+        }
+    }
+
+    moveModal(deltaY) {
+        this.modal.style.transform = `translateY(${deltaY}px)`;
+    }
+
+    resetModalPosition() {
+        this.modal.style.transform = "";
+    }
+
+
+    closeModal() {
+        const modal = this.shadowRoot.querySelector("#Prestasi");
+        modal.classList.remove("modal");
+        modal.removeEventListener("touchstart", this.handleTouchStart.bind(this));
+        modal.removeEventListener("touchmove", this.handleTouchMove.bind(this));
+        modal.removeEventListener("touchend", this.handleTouchEnd.bind(this));
+        document.documentElement.style.overflowY = ""; // Menghapus gaya overflow-y: hidden dari tag <html>
+    }
+
+    _modalChanged(modal) {
+    }
+
+    _addShadowBox() {
+        const cardElement = this.shadowRoot.querySelector(".card");
+        const imgElement = new Image();
+        imgElement.src = this.backgroundImage;
+        imgElement.addEventListener("load", () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = imgElement.width;
+            canvas.height = imgElement.height;
+            const context = canvas.getContext("2d");
+            context.drawImage(imgElement, 0, 0);
+
+            const imageData = context.getImageData(0, 0, imgElement.width, imgElement.height).data;
+            const numPixels = imgElement.width * imgElement.height;
+            let totalR = 0;
+            let totalG = 0;
+            let totalB = 0;
+
+            for (let i = 0; i < numPixels * 4; i += 4) {
+                totalR += imageData[i];
+                totalG += imageData[i + 1];
+                totalB += imageData[i + 2];
+            }
+
+            const avgR = Math.round(totalR / numPixels);
+            const avgG = Math.round(totalG / numPixels);
+            const avgB = Math.round(totalB / numPixels);
+
+            const avgColor = `rgb(${avgR}, ${avgG}, ${avgB})`;
+            const boxShadowValue = `0 0 50px ${avgColor}`;
+
+            cardElement.style.setProperty("--card-box-shadow", boxShadowValue);
+            cardElement.style.removeProperty("background-color"); // Hapus background-color skeleton setelah gambar dimuat
+        });
+    }
+}
+customElements.define("ukmp-story", UKMPKartuSos);
+
+
+class kartuMed extends PolymerElement {
+    static get template() {
+        return html`
+        <style>
+        :host {
+          display: block;
+          margin: 20px;
+        }
+        .card-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          grid-template-rows: repeat(1, 1fr);
+          grid-gap: 20px;
+        }
+      </style>
+      <ukmp-header-card-story-harbar class="header"></ukmp-header-card-story-harbar>
+      <div class="card-grid">
+          <ukmp-story title="2023" description="Hari Besar 2023" url="./hariraya" color-H="black" color-A="black" color-P="black" background-Image="../images/harbas/kurban.jpg" image-alt="Hari Raya"></ukmp-story>
+          <ukmp-story title="2023" description="Hari Besar 2023" url="./hariraya" color-H="black" color-A="black" color-P="black" background-Image="../images/harbas/eid.jpg" image-alt="Hari Raya"></ukmp-story>
+      </div
+    `;
+    }
+}
+customElements.define("kartu-harbar", kartuMed);
+
+class kartuPab extends PolymerElement {
+    static get template() {
+        return html`
+        <style>
+        :host {
+          display: block;
+          margin: 20px;
+        }
+        .card-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          grid-template-rows: repeat(1, 1fr);
+          grid-gap: 20px;
+        }
+      </style>
+      <ukmp-header-card-story-pab class="header"></ukmp-header-card-story-pab>
+      <div class="card-grid">
+          <ukmp-story title="2022" description="PAB 2022" url="./pabukmp/2022" color-H="black" color-A="white" color-P="white" background-Image="../logo/312086426_5550639028376326_5765999735847858872_n.jpg" image-alt="Hari Raya"></ukmp-story>
+          <ukmp-story title="2021" description="PAB 2021" url="./pabukmp/2021" color-H="white" color-A="black" color-P="white" background-Image="../logo/244521759_589536129145018_7560806369087012558_n.jpg"></ukmp-story>
+      </div>
+    `
+    }
+}
+customElements.define("kartu-pab", kartuPab);
+
+class kartuda extends PolymerElement {
+    static get template() {
+        return html`
+        <style>
+        :host {
+          display: block;
+          margin: 20px;
+        }
+        .card-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          grid-template-rows: repeat(1, 1fr);
+          grid-gap: 20px;
+        }
+      </style>
+      <ukmp-header-card-story-da class="header"></ukmp-header-card-story-da>
+      <div class="card-grid">
+          <ukmp-story title="2021" description="Daftar Alumni 2021" url="./daukmp/" color-H="black" color-A="black" color-P="black" background-Image="../logo/116223589_1017768482011615_7046452088022274670_n.jpg" image-alt="Hari Raya"></ukmp-story>
+          <ukmp-story title="2020" description="Daftar Alumni 2020" url="./daukmp/" color-H="black" color-A="black" color-P="black" background-Image="../logo/116223589_1017768482011615_7046452088022274670_n.jpg"></ukmp-story>
+          <ukmp-story title="2019" description="Daftar Alumni 2019" url="./daukmp/" color-H="black" color-A="black" color-P="black" background-Image="../logo/116223589_1017768482011615_7046452088022274670_n.jpg"></ukmp-story>
+      </div>
+    `
+    }
+}
+customElements.define("kartu-da", kartuda);
+
+class kartuUpgra extends PolymerElement {
+    static get template() {
+        return html`
+        <style>
+        :host {
+          display: block;
+          margin: 20px;
+        }
+        .card-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          grid-template-rows: repeat(1, 1fr);
+          grid-gap: 20px;
+        }
+      </style>
+      <ukmp-header-card-story-upgrading class="header"></ukmp-header-card-story-upgrading>
+      <div class="card-grid">
+        <ukmp-story title="2023" description="Upgrading 2023" url="#" color-H="black" color-A="black" color-P="black" background-Image="/../../images/upgrading.png" image-alt="Upgrading"></ukmp-story>
+      </div>
+    `
+    }
+}
+customElements.define("kartu-upgrading", kartuUpgra);
+
+class kartuHutf extends PolymerElement {
+    static get template() {
+        return html`
+        <style>
+        :host {
+          display: block;
+          margin: 20px;
+        }
+        .card-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          grid-template-rows: repeat(1, 1fr);
+          grid-gap: 20px;
+        }
+      </style>
+      <ukmp-header-card-story-hutf class="header"></ukmp-header-card-story-hutf>
+      <div class="card-grid">
+          <ukmp-story title="2022" description="PAB 2022" url="./pabukmp/2022" color-H="black" color-A="white" color-P="white" background-Image="../logo/312086426_5550639028376326_5765999735847858872_n.jpg" image-alt="Hari Raya"></ukmp-story>
+          <ukmp-story title="2021" description="PAB 2021" url="./pabukmp/2021" color-H="white" color-A="black" color-P="white" background-Image="../logo/244521759_589536129145018_7560806369087012558_n.jpg"></ukmp-story>
+          <ukmp-story title="2020" description="PAB 2019" url="#" color-H="white" color-A="white" color-P="white" background-Image="../logo/arunika.webp"></ukmp-story>
+      </div>
+    `
+    }
+}
+customElements.define("kartu-hutf", kartuHutf);
+
+class kartuPres extends PolymerElement {
+    static get template() {
+        return html`
+        <style>
+        :host {
+          display: block;
+          margin: 20px;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(1, 1fr);
+            grid-gap: 20px;
+            justify-items: center;
+            justify-content: space-around;
+        }
+        .hidden {
+            display: none;
+        }
+        .story-button-prev-start {
+            background-color: black;
+            color: #f0f0f0;
+            padding: 5px;
+            border: none;
+            border-radius: 45px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-right: 10px;
+            position: absolute;
+            right: 0;
+            width: 35px;
+            bottom: 50%;
+        }
+        .story-button-prev-secound {
+            background-color: black;
+            color: #f0f0f0;
+            padding: 5px;
+            border: none;
+            border-radius: 45px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-right: 10px;
+            position: absolute;
+            left: 0;
+            width: 35px;
+            bottom: 50%;
+            z-index: 1;
+        }
+      </style>
+      <ukmp-header-card-story-prestasi class="header"></ukmp-header-card-story-prestasi>
+      <div class$="{{storyStartApp}} card-grid">
+        <ukmp-story-prestasi title="2023" description="Lolos Perdanaan PKM" url="./story" color-H="white" color-A="white" color-P="white" background-Image="../images/prestasi/353822697_1290665238496493_6227867768103515191_n.jpeg" image-alt="Hari Raya" modal nama-orang="Jabar" jenis-prestasi="Lolos Perdanaan PKM" tahun-prestasi="2023" juara-prestasi="Lolos Perdanaan PKM"></ukmp-story-prestasi>
+        <ukmp-story-prestasi title="2023" description="Lolos Perdanaan PKM" url="./story" color-H="white" color-A="white" color-P="white" background-Image="../images/prestasi/353861515_640079521512682_3370790497817475094_n.jpeg" image-alt="Hari Raya" modal nama-orang="Fajar" jenis-prestasi="Lolos Perdanaan PKM" tahun-prestasi="2023" juara-prestasi="Lolos Perdanaan PKM"></ukmp-story-prestasi>
+        <button class="button story-button-prev-start" on-click="startStory">
+            <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+        </button>
+      </div>
+      <div class$="{{storySecoundApp}} card-grid">
+            <button class="button story-button-prev-secound" on-click="secoundStory">
+                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+            </button>
+            <ukmp-story-prestasi title="2023" description="Lolos Perdanaan PKM" url="./story" color-H="white" color-A="white" color-P="white" background-Image="../images/prestasi/353880985_1258843091438694_2786285672251724551_n.jpeg" image-alt="Hari Raya" modal nama-orang="Hasan" jenis-prestasi="Lolos Perdanaan PKM" tahun-prestasi="2023" juara-prestasi="Lolos Perdanaan PKM"></ukmp-story-prestasi>
+            <ukmp-story-prestasi title="2023" description="Lolos Perdanaan PKM" url="./story" color-H="white" color-A="white" color-P="white" background-Image="../images/prestasi/354013433_626073636154699_356598338880584908_n.jpeg" image-alt="Hari Raya" modal nama-orang="Hanina" jenis-prestasi="Lolos Perdanaan PKM" tahun-prestasi="2023" juara-prestasi="Lolos Perdanaan PKM"></ukmp-story-prestasi>
+            <button class="button story-button-prev-start" on-click="secoundStorynex">
+                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+            </button>
+      </div>
+      <div class$="{{storyTreeApp}} card-grid">
+        <button class="button story-button-prev-secound" on-click="treeStory">
+            <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+        </button>
+        <ukmp-story-prestasi title="2023" description="Lolos Perdanaan PKM" url="./story" color-H="white" color-A="white" color-P="white" background-Image="../images/prestasi/354436069_6435225773224205_7802162265042735503_n.jpeg" modal nama-orang="Evin" jenis-prestasi="Lolos Perdanaan PKM" tahun-prestasi="2023" juara-prestasi="Lolos Perdanaan PKM"></ukmp-story-prestasi>
+        <ukmp-story-prestasi title="2023" description="Lolos Perdanaan PKM" url="./story" color-H="white" color-A="white" color-P="white" background-Image="../images/prestasi/354508328_802993194507779_8681963008183073113_n.jpeg" modal nama-orang="Intan" jenis-prestasi="Lolos Perdanaan PKM" tahun-prestasi="2023" juara-prestasi="Lolos Perdanaan PKM"></ukmp-story-prestasi>
+      </div>
+    `;
+    }
+    static get properties() {
+        return {
+            storyStartApp: {
+                type: String,
+                value: ""
+            },
+            storySecoundApp: {
+                type: String,
+                value: "hidden"
+            },
+            storyTreeApp: {
+                type: String,
+                value: "hidden"
+            }
+        };
+    }
+
+    startStory() {
+        this.storyStartApp = "hidden"; // Menambahkan kelas "hidden" pada travelAppSplashClass
+        this.storySecoundApp = "";
+    }
+
+    secoundStory() {
+        this.storySecoundApp = "hidden";
+        this.storyStartApp = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    secoundStorynex() {
+        this.storySecoundApp = "hidden";
+        this.storyTreeApp = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    treeStory() {
+        this.storyTreeApp = "hidden";
+        this.storySecoundApp = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        const button1Clicked = localStorage.getItem('button1Clicked');
+
+        if (button1Clicked) {
+            // Jika pengguna telah mengklik Button 1 sebelumnya,
+            // langsung tampilkan halaman home-app dan sembunyikan travel-app-splash
+            this.showHome();
+        } else if (button1Clicked) {
+            this.secoundStory();
+        }
+        this.addEventListener("button-clicked", this.handleButtonClick);
+    }
+}
+customElements.define("kartu-prestasi", kartuPres);
+
+class UkmpHeaderCardSto extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: "open" });
+        this.shadowRoot.innerHTML = `
+        <style nonce="${this.getNonce()}">
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          }
+          .left-header {
+            font-weight: bold;
+            font-size: 24px;
+          }
+          .right-header a {
+            font-size: 16px;
+            text-decoration: none;
+            color: #BFBFBF;
+          }
+        </style>
+        <div class="header">
+          <ukmp-text class="left-header" text="Story UKMP"></ukmp-text>
+          <div class="right-header">
+            <ukmp-text class="right-header" href="https://ukmpapps.web.app/su" link-text="Lihat Selengkapnya"></ukmp-text>
+          </div>
+        </div>
+      `;
+    }
+
+    getNonce() {
+        const meta = document.querySelector('meta[property="csp-nonce"]');
+        if (meta) {
+            const nonce = meta.getAttribute('content');
+            if (nonce) {
+                return nonce;
+            }
+        }
+
+        // generate random nonce
+        const array = new Uint32Array(4);
+        window.crypto.getRandomValues(array);
+        const randomString = array.join('');
+        return `nonce-${randomString}`;
+    }
+}
+
+customElements.define("ukmp-header-card-story", UkmpHeaderCardSto);
+
+class UkmpHeaderCardSosPab extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: "open" });
+        this.shadowRoot.innerHTML = `
+        <style nonce="${this.getNonce()}">
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          }
+          .left-header {
+            font-weight: bold;
+            font-size: 24px;
+          }
+          .right-header a {
+            font-size: 16px;
+            text-decoration: none;
+            color: #BFBFBF;
+          }
+        </style>
+        <div class="header">
+          <ukmp-text class="left-header" text="Penerimaan Anggota Baru"></ukmp-text>
+          <div class="right-header">
+            <ukmp-text class="right-header" text="" href="https://ukmpapps.web.app/ms" link-text="Lihat Selengkapnya"></ukmp-text>
+          </div>
+        </div>
+      `;
+    }
+
+    getNonce() {
+        const meta = document.querySelector('meta[property="csp-nonce"]');
+        if (meta) {
+            const nonce = meta.getAttribute('content');
+            if (nonce) {
+                return nonce;
+            }
+        }
+
+        // generate random nonce
+        const array = new Uint32Array(4);
+        window.crypto.getRandomValues(array);
+        const randomString = array.join('');
+        return `nonce-${randomString}`;
+    }
+}
+
+customElements.define("ukmp-header-card-story-pab", UkmpHeaderCardSosPab);
+
+class UkmpHeaderCardSosHarbar extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: "open" });
+        this.shadowRoot.innerHTML = `
+        <style nonce="${this.getNonce()}">
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          }
+          .left-header {
+            font-weight: bold;
+            font-size: 24px;
+          }
+          .right-header a {
+            font-size: 16px;
+            text-decoration: none;
+            color: #BFBFBF;
+          }
+        </style>
+        <div class="header">
+          <ukmp-text class="left-header" text="Hari Besar"></ukmp-text>
+          <div class="right-header">
+            <ukmp-text class="right-header" text="" href="https://ukmpapps.web.app/ms" link-text="Lihat Selengkapnya"></ukmp-text>
+          </div>
+        </div>
+      `;
+    }
+
+    getNonce() {
+        const meta = document.querySelector('meta[property="csp-nonce"]');
+        if (meta) {
+            const nonce = meta.getAttribute('content');
+            if (nonce) {
+                return nonce;
+            }
+        }
+
+        // generate random nonce
+        const array = new Uint32Array(4);
+        window.crypto.getRandomValues(array);
+        const randomString = array.join('');
+        return `nonce-${randomString}`;
+    }
+}
+
+customElements.define("ukmp-header-card-story-harbar", UkmpHeaderCardSosHarbar);
+
+class UkmpHeaderCardSosDa extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: "open" });
+        this.shadowRoot.innerHTML = `
+        <style nonce="${this.getNonce()}">
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          }
+          .left-header {
+            font-weight: bold;
+            font-size: 24px;
+          }
+          .right-header a {
+            font-size: 16px;
+            text-decoration: none;
+            color: #BFBFBF;
+          }
+        </style>
+        <div class="header">
+          <ukmp-text class="left-header" text="Daftar Alumni"></ukmp-text>
+          <div class="right-header">
+            <ukmp-text class="right-header" text="" href="https://ukmpapps.web.app/ms" link-text="Lihat Selengkapnya"></ukmp-text>
+          </div>
+        </div>
+      `;
+    }
+
+    getNonce() {
+        const meta = document.querySelector('meta[property="csp-nonce"]');
+        if (meta) {
+            const nonce = meta.getAttribute('content');
+            if (nonce) {
+                return nonce;
+            }
+        }
+
+        // generate random nonce
+        const array = new Uint32Array(4);
+        window.crypto.getRandomValues(array);
+        const randomString = array.join('');
+        return `nonce-${randomString}`;
+    }
+}
+
+customElements.define("ukmp-header-card-story-da", UkmpHeaderCardSosDa);
+
+class UkmpHeaderCardSosPres extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: "open" });
+        this.shadowRoot.innerHTML = `
+        <style nonce="${this.getNonce()}">
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          }
+          .left-header {
+            font-weight: bold;
+            font-size: 24px;
+          }
+          .right-header a {
+            font-size: 16px;
+            text-decoration: none;
+            color: #BFBFBF;
+          }
+        </style>
+        <div class="header">
+          <ukmp-text class="left-header" text="Prestasi UKMP"></ukmp-text>
+          <div class="right-header">
+            <ukmp-text class="right-header" text="" href="https://ukmpapps.web.app/ms" link-text="Lihat Selengkapnya"></ukmp-text>
+          </div>
+        </div>
+      `;
+    }
+
+    getNonce() {
+        const meta = document.querySelector('meta[property="csp-nonce"]');
+        if (meta) {
+            const nonce = meta.getAttribute('content');
+            if (nonce) {
+                return nonce;
+            }
+        }
+
+        // generate random nonce
+        const array = new Uint32Array(4);
+        window.crypto.getRandomValues(array);
+        const randomString = array.join('');
+        return `nonce-${randomString}`;
+    }
+}
+
+customElements.define("ukmp-header-card-story-prestasi", UkmpHeaderCardSosPres);
+
+class UkmpHeaderCardSosUpgradingr extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: "open" });
+        this.shadowRoot.innerHTML = `
+        <style nonce="${this.getNonce()}">
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          }
+          .left-header {
+            font-weight: bold;
+            font-size: 24px;
+          }
+          .right-header a {
+            font-size: 16px;
+            text-decoration: none;
+            color: #BFBFBF;
+          }
+        </style>
+        <div class="header">
+          <ukmp-text class="left-header" text="Upgrading"></ukmp-text>
+          <div class="right-header">
+            <ukmp-text class="right-header" text="" href="https://ukmpapps.web.app/ms" link-text="Lihat Selengkapnya"></ukmp-text>
+          </div>
+        </div>
+      `;
+    }
+
+    getNonce() {
+        const meta = document.querySelector('meta[property="csp-nonce"]');
+        if (meta) {
+            const nonce = meta.getAttribute('content');
+            if (nonce) {
+                return nonce;
+            }
+        }
+
+        // generate random nonce
+        const array = new Uint32Array(4);
+        window.crypto.getRandomValues(array);
+        const randomString = array.join('');
+        return `nonce-${randomString}`;
+    }
+}
+
+customElements.define("ukmp-header-card-story-upgrading", UkmpHeaderCardSosUpgradingr);
+
+class UkmpHeaderCardSosHutf extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: "open" });
+        this.shadowRoot.innerHTML = `
+        <style nonce="${this.getNonce()}">
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          }
+          .left-header {
+            font-weight: bold;
+            font-size: 24px;
+          }
+          .right-header a {
+            font-size: 16px;
+            text-decoration: none;
+            color: #BFBFBF;
+          }
+        </style>
+        <div class="header">
+          <ukmp-text class="left-header" text="Hari Ulang Tahun"></ukmp-text>
+          <div class="right-header">
+            <ukmp-text class="right-header" text="" href="https://ukmpapps.web.app/ms" link-text="Lihat Selengkapnya"></ukmp-text>
+          </div>
+        </div>
+      `;
+    }
+
+    getNonce() {
+        const meta = document.querySelector('meta[property="csp-nonce"]');
+        if (meta) {
+            const nonce = meta.getAttribute('content');
+            if (nonce) {
+                return nonce;
+            }
+        }
+
+        // generate random nonce
+        const array = new Uint32Array(4);
+        window.crypto.getRandomValues(array);
+        const randomString = array.join('');
+        return `nonce-${randomString}`;
+    }
+}
+
+customElements.define("ukmp-header-card-story-hutf", UkmpHeaderCardSosHutf);
+
+class Card extends PolymerElement {
+    static get template() {
+        return html`
+        <style>
+        .card-container {
+            display: flex;
+            justify-content: space-between;
+            background-color: #0d1117;
+            color: #0d1117;
+            overflow-x: hidden;
+          }
+
+          .modal-button {
+            width: max-content;
+            padding: 20px 0 0px 0;
+            height: 185px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 0 5px;
+          }
+          
+          .card-content {
+            height: 200px;
+          }
+          
+          iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            overflow: hidden;
+            margin-top: 10px
+          }
+          .text-wrapper {
+            color: #545454;
+            font-weight: 800;
+            margin-bottom: 20px
+          }         
+        </style>
+        <div class="card-container">
+            <button class="modal-button" data-link="https://ukmpapps.web.app/apps/" on-click="navigateToLink">
+                <ukmp-text class="text-wrapper">Beranda</ukmp-text>
+                <iframe scrolling="no" src="https://ukmpapps.web.app/apps" frameborder="0"></iframe>
+            </button>
+            <button class="modal-button" data-link="https://ukmpapps.web.app/apps/story/" on-click="navigateToLink">
+                <ukmp-text class="text-wrapper">Yang anda Kunjungi</ukmp-text>
+                <iframe scrolling="no" src="https://ukmpapps.web.app/apps/story" frameborder="0"></iframe>
+            </button>
+        </div>
+        `
+    }
+
+    navigateToLink(event) {
+        const button = event.target;
+        const link = button.getAttribute('data-link');
+        if (link) {
+            window.location.href = link;
+        }
+    }
+}
+
+customElements.define('ukmp-card', Card);
+
+class DepartementCardHRD extends PolymerElement {
+    static get template() {
+        return html`
+          <style>
+            .modal {
+                display: none;
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                width: 100%;
+                height: max-content;
+                z-index: 999;
+                transform: translate(-50%);
+            }
+            
+            .modal-content {
+                position: absolute;
+                bottom: 0px;
+                left: 50%;
+                transform: translate(-50%);
+                background-color: #fff;
+                padding: 10px;
+                width: 85%;
+                border-radius: 20px;
+            }
+
+            .close-button {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                width: 24px;
+                height: 24px;
+                border: none;
+                background-color: transparent;
+                font-size: 18px;
+                color: #999999;
+                cursor: pointer;
+                font-size: 28px;
+                z-index: 1;
+            }
+            
+            .close-button:hover {
+                color: #555555;
+            }
+
+            .headco {
+                display: flex;
+                align-items: center;
+                gap: 5%;
+            }
+
+            .chilpar {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin: 0;
+            }
+
+            .prchilpar {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .button-container{
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin: 20px;
+            }
+
+            .button-container h2 {
+                margin: 0;
+            }
+
+            .button-container h2 {
+                margin: 0;
+                color: #666666;
+            }
+
+            .button-container .list-item {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin: 0;
+            }
+
+            .button-container .list-item image-component{
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+            }
+
+            .modal-button {
+                background-color: #0f0f0f;
+                color: #fff;
+                padding: 10px 0px;
+                border: none;
+                border-radius: 100px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+            }
+
+            .modal-button-li {
+                background-color: #fff;
+                color: #0f0f0f;
+                padding: 10px 0px;
+                border: none;
+                border-radius: 100px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                right: 0
+            }
+            
+            .chil-button-prev {
+                background-color: black;
+                color: #f0f0f0;
+                padding: 5px;
+                border: none;
+                border-radius: 45px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                right: 0;
+                width: 35px;
+            }
+            
+            .chil-button-next {
+                background-color: black;
+                color: #f0f0f0;
+                padding: 5px;
+                border: none;
+                border-radius: 45px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                left: 0;
+                width: 35px;
+            }
+
+            .text-wrapper {
+              font-size: 24px;
+              font-weight: bold;
+              margin-bottom: 10px;
+            }
+            
+            .centered-button {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background-color: transparent;
+                background-image: url("/../../images/HRD.jpg");
+                background-repeat: no-repeat;
+                background-size: 50px;
+                border: none;
+            }
+            .hidden {
+                display: none;
+            }
+            @media (prefers-color-scheme: dark) {
+                .modal-content {
+                    background: #161b22;
+                    color: #f4f4f4;
+                }
+                .modal-button-li {
+                    background-color: #161b22;
+                    color: #0f0f0f;
+                }
+
+            }
+          </style>
+
+            <div class="profile-picture">
+                <button class="centered-button" on-click="openModal" aria-labelledby="Profile Departement" title="Profile Departement"></button>
+            </div>
+      
+            <div id="modal" class="modal" on-touchstart="handleTouchStart" on-touchmove="handleTouchMove" on-touchend="handleTouchEnd">
+                <div class="modal-content">
+                    <div class="headco">
+                        <button class="close-button" on-click="closeModal">&#215;</button>
+                        <ukmp-text class="text-wrapper" text="[[namaDepartemen]]">[[namaDepartemen]]</ukmp-text>
+                    </div>
+                    <div class="button-container">
+                        <div class="list-item">
+                            <image-component src="[[imageSrc]]"></image-component>
+                        </div>
+                        <div class="list-item">
+                            <ukmp-text class="text-wrapper" id="deskripsi" text$="[[deskripsiDepartemen]]">[[deskripsiDepartemen]]</ukmp-text>
+                            <button class="modal-button" data-link="https://ukmpapps.web.app/hrd" on-click="navigateToLink"><ukmp-text text="Ketahui Lebih lanjut">Ketahui Lebih lanjut</ukmp-text></button>
+                        </div>
+                    </div>
+                    <div class="chilpar">
+                        <div class="headco">
+                            <ukmp-text class="text-wrapper" text="Anggota HRD">Anggota HRD</ukmp-text>
+                            <button class="modal-button-li" data-link="https://www.instagram.com/p/Cq1_5bUJbOh/" on-click="navigateToLink"><ukmp-text text="Lihat Selengkapnya">Lihat Selengkapnya</ukmp-text></button>
+                        </div>    
+                        <div class$="prchilpar {{travelAppSplashClass}}">
+                            <image-component src="/../../images/Zikri Wildan Setiadi_HRD.JPG"></image-component>
+                            <image-component src="/../../images/Nina Martian Ningsih _HRD.JPG"></image-component>
+                            <button class="button chil-button-prev" on-click="showHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                        <div class$="prchilpar {{homeAppClass}}"">
+                            <image-component src="/../../images/Abrar Rizq_HRD.jpg"></image-component>
+                            <image-component src="/../../images/Puti Sekar Arginingrum_HRD.png"></image-component>
+                            <button class="button chil-button-next" on-click="prevHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                            <button class="button chil-button-prev" on-click="prevHome2">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                        <div class$="prchilpar {{homeAppClassRe}}"">
+                            <image-component src="/../../images/BENI AJI SUBEKTI_HRD 2.jpeg"></image-component>
+                            <image-component src="/../../images/Rikha Fitriani Umayatun_HRD.jpeg"></image-component>
+                            <button class="button chil-button-next" on-click="prevHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    static get properties() {
+        return {
+            homeAppClass: {
+                type: String,
+                value: "hidden"
+            },
+            homeAppClassRe: {
+                type: String,
+                value: "hidden"
+            },
+            travelAppSplashClass: {
+                type: String,
+                value: ""
+            },
+            namaDepartemen: {
+                type: String,
+                value: '',
+                reflectToAttribute: true,  // added for attribute-property binding
+                observer: '_namaDepartemenChanged'  // added observer
+            },
+            deskripsiDepartemen: {
+                type: String,
+                value: '',
+                reflectToAttribute: true,  // added for attribute-property binding
+                observer: '_deskripsiDepartemenChanged'  // added observer
+            },
+            imageSrc: String,
+        };
+    }
+
+    // observer function for namaDepartemen property
+    _namaDepartemenChanged(newVal) {
+        // code to handle the updated value of namaDepartemen
+        const ukmpTextElement = this.shadowRoot.querySelector('ukmp-text');
+        if (ukmpTextElement) {
+            ukmpTextElement.setAttribute('text', newVal);
+        }
+    }
+
+    _deskripsiDepartemenChanged(hallo) {
+        // code to handle the updated value of namaDepartemen
+        const Hal = this.shadowRoot.querySelector('ukmp-text #deskripsi');
+        if (Hal) {
+            Hal.setAttribute('text', hallo);
+        }
+    }
+
+    showHome() {
+        this.homeAppClass = ""; // Menghapus kelas "hidden" pada homeAppClass
+        this.travelAppSplashClass = "hidden"; // Menambahkan kelas "hidden" pada travelAppSplashClass
+        this.homeAppClassRe = "hidden";
+    }
+
+    prevHome() {
+        this.homeAppClass = "hidden"; // Menghapus kelas "hidden" pada homeAppClass
+        this.homeAppClassRe = "hidden";
+        this.travelAppSplashClass = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    prevHome2() {
+        this.homeAppClassRe = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+        this.travelAppSplashClass = "hidden"; // Menghapus kelas "hidden" pada homeAppClass
+        this.homeAppClass = "hidden"; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.namaDepartemen = this.getAttribute("nama-departemen");
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.querySelector('html').setAttribute('dark-theme', '');
+            document.body.style.backgroundColor = '#0d111';
+            document.body.style.color = '#f4f4f4';
+        }
+        this.deksripsiDepartemen = this.getAttribute("deskripsi-departemen");
+        this._namaDepartemenChanged(this.namaDepartemen);  // initial call to the observer function
+        this._deskripsiDepartemenChanged(this.deksripsiDepartemen);  // initial call to the observer function
+        this.modal = this.shadowRoot.getElementById("modal");
+        this.moni = this.shadowRoot.getElementById("moni");
+        this.addEventListener("button-clicked", this.handleButtonClick);
+        // Periksa apakah pengguna sudah mengklik Button 1 sebelumnya
+        const button1Clicked = localStorage.getItem('button1Clicked');
+
+        if (button1Clicked) {
+            // Jika pengguna telah mengklik Button 1 sebelumnya,
+            // langsung tampilkan halaman home-app dan sembunyikan travel-app-splash
+            this.showHome();
+        } else if (button1Clicked) {
+            this.prevHome();
+        } else if (button1Clicked) {
+            this.prevHome2();
+        } else {
+            // Jika pengguna belum mengklik Button 1 sebelumnya,
+            // tampilkan travel-app-splash dan sembunyikan home-app
+            this.showTravelAppSplash();
+        }
+    }
+
+    navigateToLink(event) {
+        const button = event.target;
+        const link = button.getAttribute('data-link');
+        if (link) {
+            window.location.href = link;
+        }
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.removeEventListener("button-clicked", this.handleButtonClick);
+    }
+
+    openModal() {
+        this.modal = this.shadowRoot.getElementById("modal");
+        this.modal.style.display = "block";
+        this.modalStartPosition = 0;
+        this.modal.addEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.addEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.addEventListener("touchend", this.handleTouchEnd.bind(this));
+    }
+
+    handleTouchStart(e) {
+        this.startY = e.touches[0].pageY;
+        this.modalStartPosition = this.modal.getBoundingClientRect().top;
+    }
+
+    handleTouchMove(e) {
+        const deltaY = e.touches[0].pageY - this.startY;
+        this.moveModal(deltaY);
+    }
+
+    handleTouchEnd(e) {
+        const deltaY = e.changedTouches[0].pageY - this.startY;
+        if (deltaY > 100) {
+            this.closeModal();
+        } else {
+            this.resetModalPosition();
+        }
+    }
+
+    moveModal(deltaY) {
+        this.modal.style.transform = `translateY(${deltaY}px)`;
+        this.moni.style.transform = `translateY(${deltaY}px)`
+    }
+
+    resetModalPosition() {
+        this.modal.style.transform = "";
+        this.moni.style.transform = "";
+    }
+
+    closeModal() {
+        this.modal.style.display = "none";
+        this.modal.removeEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.removeEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.removeEventListener("touchend", this.handleTouchEnd.bind(this));
+    }
+
+    handleButtonClick(e) {
+        const button = e.target;
+        console.log("Button clicked:", button.textContent);
+    }
+}
+
+customElements.define('ukmp-departement-hrd', DepartementCardHRD)
+
+class DepartementCardDD extends PolymerElement {
+    static get template() {
+        return html`
+          <style>
+            .modal {
+                display: none;
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                width: 100%;
+                height: max-content;
+                z-index: 999;
+                transform: translate(-50%);
+            }
+            
+            .modal-content {
+                position: absolute;
+                bottom: 0px;
+                left: 50%;
+                transform: translate(-50%);
+                background-color: #fff;
+                padding: 10px;
+                width: 85%;
+                border-radius: 20px;
+            }
+
+            .close-button {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                width: 24px;
+                height: 24px;
+                border: none;
+                background-color: transparent;
+                font-size: 18px;
+                color: #999999;
+                cursor: pointer;
+                font-size: 28px;
+                z-index: 1;
+            }
+            
+            .close-button:hover {
+                color: #555555;
+            }
+
+            .headco {
+                display: flex;
+                align-items: center;
+                gap: 5%;
+            }
+
+            .chilpar {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin: 0;
+            }
+
+            .prchilpar {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .button-container{
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin: 20px;
+            }
+
+            .button-container h2 {
+                margin: 0;
+            }
+
+            .button-container h2 {
+                margin: 0;
+                color: #666666;
+            }
+
+            .button-container .list-item {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin: 0;
+            }
+
+            .button-container .list-item image-component{
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+            }
+
+            .modal-button {
+                background-color: #0f0f0f;
+                color: #fff;
+                padding: 10px 0px;
+                border: none;
+                border-radius: 100px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+            }
+
+            .modal-button-li {
+                background-color: #fff;
+                color: #0f0f0f;
+                padding: 10px 0px;
+                border: none;
+                border-radius: 100px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                right: 0
+            }
+            
+            .chil-button-prev {
+                background-color: black;
+                color: #f0f0f0;
+                padding: 5px;
+                border: none;
+                border-radius: 45px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                right: 0;
+                width: 35px;
+            }
+            
+            .chil-button-next {
+                background-color: black;
+                color: #f0f0f0;
+                padding: 5px;
+                border: none;
+                border-radius: 45px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                left: 0;
+                width: 35px;
+            }
+
+            .text-wrapper {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            }
+            
+            .centered-button {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background-color: transparent;
+                background-image: url("/../../images/dd/DD.jpg");
+                background-repeat: no-repeat;
+                background-size: 50px;
+                border: none;
+            }
+            .hidden {
+                display: none;
+            }
+            @media (prefers-color-scheme: dark) {
+                .modal-content {
+                    background: #161b22;
+                    color: #f4f4f4;
+                }
+                .modal-button-li {
+                    background-color: #161b22;
+                    color: #0f0f0f;
+                }
+
+            }
+          </style>
+
+            <div class="profile-picture">
+                <button class="centered-button" on-click="openModal" aria-labelledby="Profile Departement" title="Profile Departement"></button>
+            </div>
+      
+            <div id="modal" class="modal" on-touchstart="handleTouchStart" on-touchmove="handleTouchMove" on-touchend="handleTouchEnd">
+                <div class="modal-content">
+                    <div class="headco">
+                        <button class="close-button" on-click="closeModal">&#215;</button>
+                        <ukmp-text class="text-wrapper" text="[[namaDepartement]]">[[namaDepartemen]]</ukmp-text>
+                    </div>
+                    <div class="button-container">
+                        <div class="list-item">
+                            <image-component src="[[imageSrc]]"></image-component>
+                        </div>
+                        <div class="list-item">
+                            <ukmp-text id="deskripsi" text$="[[deskripsiDepartemen]]">[[deskripsiDepartemen]]</ukmp-text>
+                            <button class="modal-button" data-link="https://ukmpapps.web.app/hrd" on-click="navigateToLink"><ukmp-text text="Ketahui Lebih lanjut">Ketahui Lebih lanjut</ukmp-text></button>
+                        </div>
+                    </div>
+                    <div class="chilpar">
+                        <div class="headco">
+                            <ukmp-text class="text-wrapper" text="Anggota DD">Anggota DD</ukmp-text>
+                            <button class="modal-button-li" data-link="https://www.instagram.com/p/Cq1_5bUJbOh/" on-click="navigateToLink"><ukmp-text text="Lihat Selengkapnya">Lihat Selengkapnya</ukmp-text></button>
+                        </div>    
+                        <div class$="prchilpar {{travelAppSplashClass}}">
+                            <image-component src="/../../images/dd/FAIZA GALUH MARTA_DD.HEIC"></image-component>
+                            <image-component src="/../../images/dd/Fajar Wahyushi Fuedsi_DD.HEIC"></image-component>
+                            <image-component src="/../../images/dd/Fatimah_DD.jpg"></image-component>
+                            <button class="button chil-button-prev" on-click="showHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                        <div class$="prchilpar {{homeAppClass}}"">
+                            <image-component src="/../../images/dd/Nur Fadiyah Choirunnissa_DD.HEIC"></image-component>
+                            <image-component src="/../../images/dd/GALIH RIDHO UTOMO_DD.HEIC"></image-component>
+                            <button class="button chil-button-next" on-click="prevHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                            <button class="button chil-button-prev" on-click="prevHome2">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                        <div class$="prchilpar {{homeAppClassRe}}"">
+                            <image-component src="/../../images/dd/IMG_20220601_165412_070723.jpg"></image-component>
+                            <image-component src="/../../images/dd/Nining Hardiyanti_DD.HEIC"></image-component>
+                            <button class="button chil-button-next" on-click="prevHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    static get properties() {
+        return {
+            homeAppClass: {
+                type: String,
+                value: "hidden"
+            },
+            homeAppClassRe: {
+                type: String,
+                value: "hidden"
+            },
+            travelAppSplashClass: {
+                type: String,
+                value: ""
+            },
+            namaDepartemen: {
+                type: String,
+                value: '',
+                reflectToAttribute: true,  // added for attribute-property binding
+                observer: '_namaDepartemenChanged'  // added observer
+            },
+            deskripsiDepartemen: {
+                type: String,
+                value: '',
+                reflectToAttribute: true,  // added for attribute-property binding
+                observer: '_deskripsiDepartemenChanged'  // added observer
+            },
+            imageSrc: String,
+        };
+    }
+
+    // observer function for namaDepartemen property
+    _namaDepartemenChanged(newVal) {
+        // code to handle the updated value of namaDepartemen
+        const ukmpTextElement = this.shadowRoot.querySelector('ukmp-text');
+        if (ukmpTextElement) {
+            ukmpTextElement.setAttribute('text', newVal);
+        }
+    }
+
+    _deskripsiDepartemenChanged(hallo) {
+        // code to handle the updated value of namaDepartemen
+        const Hal = this.shadowRoot.querySelector('ukmp-text #deskripsi');
+        if (Hal) {
+            Hal.setAttribute('text', hallo);
+        }
+    }
+
+    showHome() {
+        this.homeAppClass = ""; // Menghapus kelas "hidden" pada homeAppClass
+        this.travelAppSplashClass = "hidden"; // Menambahkan kelas "hidden" pada travelAppSplashClass
+        this.homeAppClassRe = "hidden";
+    }
+
+    prevHome() {
+        this.homeAppClass = "hidden"; // Menghapus kelas "hidden" pada homeAppClass
+        this.homeAppClassRe = "hidden";
+        this.travelAppSplashClass = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    prevHome2() {
+        this.homeAppClassRe = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+        this.travelAppSplashClass = "hidden"; // Menghapus kelas "hidden" pada homeAppClass
+        this.homeAppClass = "hidden"; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.namaDepartemen = this.getAttribute("nama-departemen");
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.querySelector('html').setAttribute('dark-theme', '');
+            document.body.style.backgroundColor = '#0d111';
+            document.body.style.color = '#f4f4f4';
+        }
+        this.deksripsiDepartemen = this.getAttribute("deskripsi-departemen");
+        this._namaDepartemenChanged(this.namaDepartemen);  // initial call to the observer function
+        this._deskripsiDepartemenChanged(this.deksripsiDepartemen);  // initial call to the observer function
+        this.modal = this.shadowRoot.getElementById("modal");
+        this.moni = this.shadowRoot.getElementById("moni");
+        this.addEventListener("button-clicked", this.handleButtonClick);
+        // Periksa apakah pengguna sudah mengklik Button 1 sebelumnya
+        const button1Clicked = localStorage.getItem('button1Clicked');
+
+        if (button1Clicked) {
+            // Jika pengguna telah mengklik Button 1 sebelumnya,
+            // langsung tampilkan halaman home-app dan sembunyikan travel-app-splash
+            this.showHome();
+        } else if (button1Clicked) {
+            this.prevHome();
+        } else if (button1Clicked) {
+            this.prevHome2();
+        } else {
+            // Jika pengguna belum mengklik Button 1 sebelumnya,
+            // tampilkan travel-app-splash dan sembunyikan home-app
+            this.showTravelAppSplash();
+        }
+    }
+
+    navigateToLink(event) {
+        const button = event.target;
+        const link = button.getAttribute('data-link');
+        if (link) {
+            window.location.href = link;
+        }
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.removeEventListener("button-clicked", this.handleButtonClick);
+    }
+
+    openModal() {
+        this.modal = this.shadowRoot.getElementById("modal");
+        this.modal.style.display = "block";
+        this.modalStartPosition = 0;
+        this.modal.addEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.addEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.addEventListener("touchend", this.handleTouchEnd.bind(this));
+    }
+
+    handleTouchStart(e) {
+        this.startY = e.touches[0].pageY;
+        this.modalStartPosition = this.modal.getBoundingClientRect().top;
+    }
+
+    handleTouchMove(e) {
+        const deltaY = e.touches[0].pageY - this.startY;
+        this.moveModal(deltaY);
+    }
+
+    handleTouchEnd(e) {
+        const deltaY = e.changedTouches[0].pageY - this.startY;
+        if (deltaY > 100) {
+            this.closeModal();
+        } else {
+            this.resetModalPosition();
+        }
+    }
+
+    moveModal(deltaY) {
+        this.modal.style.transform = `translateY(${deltaY}px)`;
+        this.moni.style.transform = `translateY(${deltaY}px)`
+    }
+
+    resetModalPosition() {
+        this.modal.style.transform = "";
+        this.moni.style.transform = "";
+    }
+
+    closeModal() {
+        this.modal.style.display = "none";
+        this.modal.removeEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.removeEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.removeEventListener("touchend", this.handleTouchEnd.bind(this));
+    }
+
+    handleButtonClick(e) {
+        const button = e.target;
+        console.log("Button clicked:", button.textContent);
+    }
+}
+
+customElements.define('ukmp-departement-dd', DepartementCardDD)
+
+class DepartementCardComdev extends PolymerElement {
+    static get template() {
+        return html`
+          <style>
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 999;
+            }
+            
+            .modal-content {
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translate(-50%);
+                background-color: #fff;
+                padding: 10px;
+                width: 85%;
+                border-radius: 20px;
+            }
+            .close-button {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                width: 24px;
+                height: 24px;
+                border: none;
+                background-color: transparent;
+                font-size: 18px;
+                color: #999999;
+                cursor: pointer;
+                font-size: 28px;
+            }
+
+            .headco {
+                display: flex;
+                align-items: center;
+                gap: 5%;
+            }
+
+            .chilpar {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin: 0;
+            }
+
+            .prchilpar {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .button-container{
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin: 20px;
+            }
+
+            .button-container h2 {
+                margin: 0;
+            }
+
+            .button-container h2 {
+                margin: 0;
+                color: #666666;
+            }
+
+            .button-container .list-item {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin: 0;
+            }
+
+            .button-container .list-item image-component{
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+            }
+
+            .modal-button {
+                background-color: #0f0f0f;
+                color: #fff;
+                padding: 10px 0px;
+                border: none;
+                border-radius: 100px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+            }
+
+            .modal-button-li {
+                background-color: #fff;
+                color: #0f0f0f;
+                padding: 10px 0px;
+                border: none;
+                border-radius: 100px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                right: 0
+            }
+            
+            .chil-button-prev {
+                background-color: black;
+                color: #f0f0f0;
+                padding: 5px;
+                border: none;
+                border-radius: 45px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                right: 0;
+                width: 35px;
+            }
+            
+            .chil-button-next {
+                background-color: black;
+                color: #f0f0f0;
+                padding: 5px;
+                border: none;
+                border-radius: 45px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                left: 0;
+                width: 35px;
+            }
+
+            .text-wrapper {
+              font-size: 24px;
+              font-weight: bold;
+              margin-bottom: 10px;
+            }
+            
+            .centered-button {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background-color: transparent;
+                background-image: url("/../../images/dd/DD.jpg");
+                background-repeat: no-repeat;
+                background-size: 50px;
+                border: none;
+            }
+            .hidden {
+                display: none;
+            }
+          </style>
+
+            <div class="profile-picture">
+                <button class="centered-button" on-click="openModal" aria-labelledby="Profile Departement" title="Profile Departement"></button>
+            </div>
+      
+            <div id="modal" class="modal" on-touchstart="handleTouchStart" on-touchmove="handleTouchMove" on-touchend="handleTouchEnd">
+                <div class="modal-content">
+                    <div class="headco">
+                        <button class="close-button" on-click="closeModal">&#215;</button>
+                        <ukmp-text class="text-wrapper">[[namaDepartemen]]</ukmp-text>
+                    </div>
+                    <div class="button-container">
+                        <div class="list-item">
+                            <image-component src="[[imageSrc]]"></image-component>
+                        </div>
+                        <div class="list-item">
+                            <ukmp-text>[[deskripsiDepartemen]]</ukmp-text>
+                            <button class="modal-button" data-link="https://ukmpapps.web.app/hrd" on-click="navigateToLink"><ukmp-text>Ketahui Lebih lanjut</ukmp-text></button>
+                        </div>
+                    </div>
+                    <div class="chilpar">
+                        <div class="headco">
+                            <ukmp-text class="text-wrapper">Anggota Comdev</ukmp-text>
+                            <button class="modal-button-li" data-link="https://www.instagram.com/p/Cq1_5bUJbOh/" on-click="navigateToLink"><ukmp-text>Lihat Selengkapnya</ukmp-text></button>
+                        </div>    
+                        <div class$="prchilpar {{travelAppSplashClass}}">
+                            <image-component src="/../../images/comdev/Comdev_Ahmad Nurul Romadhon_Foto Formal.png"></image-component>
+                            <image-component src="/../../images/comdev/Alvito Surya Nugraha_COMDEV..jpg"></image-component>
+                            <button class="button chil-button-prev" on-click="showHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                        <div class$="prchilpar {{homeAppClass}}"">
+                            <image-component src="/../../images/comdev/Dilla Andini_Comdev.jpg"></image-component>
+                            <image-component src="/../../images/comdev/Medi Elfiani_COMDEV.jpg"></image-component>
+                            <button class="button chil-button-next" on-click="prevHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                            <button class="button chil-button-prev" on-click="prevHome2">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                        <div class$="prchilpar {{homeAppClassRe}}"">
+                            <image-component src="/../../images/comdev/Izzuddin Muhammad_COMDEV.jpeg"></image-component>
+                            <button class="button chil-button-next" on-click="prevHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    static get properties() {
+        return {
+            homeAppClass: {
+                type: String,
+                value: "hidden"
+            },
+            homeAppClassRe: {
+                type: String,
+                value: "hidden"
+            },
+            travelAppSplashClass: {
+                type: String,
+                value: ""
+            },
+            namaDepartemen: {
+                type: String,
+                value: ''
+            },
+            deskripsiDepartemen: {
+                type: String,
+                value: ''
+            },
+            imageSrc: String,
+        };
+    }
+
+    showHome() {
+        this.homeAppClass = ""; // Menghapus kelas "hidden" pada homeAppClass
+        this.travelAppSplashClass = "hidden"; // Menambahkan kelas "hidden" pada travelAppSplashClass
+        this.homeAppClassRe = "hidden";
+    }
+
+    prevHome() {
+        this.homeAppClass = "hidden"; // Menghapus kelas "hidden" pada homeAppClass
+        this.homeAppClassRe = "hidden";
+        this.travelAppSplashClass = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    prevHome2() {
+        this.homeAppClassRe = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+        this.travelAppSplashClass = "hidden"; // Menghapus kelas "hidden" pada homeAppClass
+        this.homeAppClass = "hidden"; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.modal = this.shadowRoot.getElementById("modal");
+        this.moni = this.shadowRoot.getElementById("moni");
+        this.addEventListener("button-clicked", this.handleButtonClick);
+        // Periksa apakah pengguna sudah mengklik Button 1 sebelumnya
+        const button1Clicked = localStorage.getItem('button1Clicked');
+
+        if (button1Clicked) {
+            // Jika pengguna telah mengklik Button 1 sebelumnya,
+            // langsung tampilkan halaman home-app dan sembunyikan travel-app-splash
+            this.showHome();
+        } else if (button1Clicked) {
+            this.prevHome();
+        } else if (button1Clicked) {
+            this.prevHome2();
+        } else {
+            // Jika pengguna belum mengklik Button 1 sebelumnya,
+            // tampilkan travel-app-splash dan sembunyikan home-app
+            this.showTravelAppSplash();
+        }
+    }
+
+    navigateToLink(event) {
+        const button = event.target;
+        const link = button.getAttribute('data-link');
+        if (link) {
+            window.location.href = link;
+        }
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.removeEventListener("button-clicked", this.handleButtonClick);
+    }
+
+    openModal() {
+        this.modal = this.shadowRoot.getElementById("modal");
+        this.modal.style.display = "block";
+        this.modalStartPosition = 0;
+        this.modal.addEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.addEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.addEventListener("touchend", this.handleTouchEnd.bind(this));
+    }
+
+    handleTouchStart(e) {
+        this.startY = e.touches[0].pageY;
+        this.modalStartPosition = this.modal.getBoundingClientRect().top;
+    }
+
+    handleTouchMove(e) {
+        const deltaY = e.touches[0].pageY - this.startY;
+        this.moveModal(deltaY);
+    }
+
+    handleTouchEnd(e) {
+        const deltaY = e.changedTouches[0].pageY - this.startY;
+        if (deltaY > 100) {
+            this.closeModal();
+        } else {
+            this.resetModalPosition();
+        }
+    }
+
+    moveModal(deltaY) {
+        this.modal.style.transform = `translateY(${deltaY}px)`;
+        this.moni.style.transform = `translateY(${deltaY}px)`
+    }
+
+    resetModalPosition() {
+        this.modal.style.transform = "";
+        this.moni.style.transform = "";
+    }
+
+    closeModal() {
+        this.modal.style.display = "none";
+        this.modal.removeEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.removeEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.removeEventListener("touchend", this.handleTouchEnd.bind(this));
+    }
+
+    handleButtonClick(e) {
+        const button = e.target;
+        console.log("Button clicked:", button.textContent);
+    }
+}
+
+customElements.define('ukmp-departement-comdev', DepartementCardComdev)
+
+class DepartementCardKarya extends PolymerElement {
+    static get template() {
+        return html`
+          <style>
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 999;
+            }
+            
+            .modal-content {
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translate(-50%);
+                background-color: #fff;
+                padding: 10px;
+                width: 85%;
+                border-radius: 20px;
+            }
+            .close-button {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                width: 24px;
+                height: 24px;
+                border: none;
+                background-color: transparent;
+                font-size: 18px;
+                color: #999999;
+                cursor: pointer;
+                font-size: 28px;
+            }
+
+            .headco {
+                display: flex;
+                align-items: center;
+                gap: 5%;
+            }
+
+            .chilpar {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin: 0;
+            }
+
+            .prchilpar {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .button-container{
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin: 20px;
+            }
+
+            .button-container h2 {
+                margin: 0;
+            }
+
+            .button-container h2 {
+                margin: 0;
+                color: #666666;
+            }
+
+            .button-container .list-item {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin: 0;
+            }
+
+            .button-container .list-item image-component{
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+            }
+
+            .modal-button {
+                background-color: #0f0f0f;
+                color: #fff;
+                padding: 10px 0px;
+                border: none;
+                border-radius: 100px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+            }
+
+            .modal-button-li {
+                background-color: #fff;
+                color: #0f0f0f;
+                padding: 10px 0px;
+                border: none;
+                border-radius: 100px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                right: 0
+            }
+            
+            .chil-button-prev {
+                background-color: black;
+                color: #f0f0f0;
+                padding: 5px;
+                border: none;
+                border-radius: 45px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                right: 0;
+                width: 35px;
+            }
+            
+            .chil-button-next {
+                background-color: black;
+                color: #f0f0f0;
+                padding: 5px;
+                border: none;
+                border-radius: 45px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                left: 0;
+                width: 35px;
+            }
+
+            .text-wrapper {
+              font-size: 24px;
+              font-weight: bold;
+              margin-bottom: 10px;
+            }
+            
+            .centered-button {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background-color: transparent;
+                background-image: url("/../../images/dd/DD.jpg");
+                background-repeat: no-repeat;
+                background-size: 50px;
+                border: none;
+            }
+            .hidden {
+                display: none;
+            }
+          </style>
+
+            <div class="profile-picture">
+                <button class="centered-button" on-click="openModal" aria-labelledby="Profile Departement" title="Profile Departement"></button>
+            </div>
+      
+            <div id="modal" class="modal" on-touchstart="handleTouchStart" on-touchmove="handleTouchMove" on-touchend="handleTouchEnd">
+                <div class="modal-content">
+                    <div class="headco">
+                        <button class="close-button" on-click="closeModal">&#215;</button>
+                        <ukmp-text class="text-wrapper">[[namaDepartemen]]</ukmp-text>
+                    </div>
+                    <div class="button-container">
+                        <div class="list-item">
+                            <image-component src="[[imageSrc]]"></image-component>
+                        </div>
+                        <div class="list-item">
+                            <ukmp-text>[[deskripsiDepartemen]]</ukmp-text>
+                            <button class="modal-button" data-link="https://ukmpapps.web.app/hrd" on-click="navigateToLink"><ukmp-text>Ketahui Lebih lanjut</ukmp-text></button>
+                        </div>
+                    </div>
+                    <div class="chilpar">
+                        <div class="headco">
+                            <ukmp-text class="text-wrapper">Anggota Karya</ukmp-text>
+                            <button class="modal-button-li" data-link="https://www.instagram.com/p/Cq1_5bUJbOh/" on-click="navigateToLink"><ukmp-text>Lihat Selengkapnya</ukmp-text></button>
+                        </div>    
+                        <div class$="prchilpar {{travelAppSplashClass}}">
+                            <image-component src="/../../images/karya/Christian Suan F.T_KARYA.JPG"></image-component>
+                            <image-component src="/../../images/karya/Hamzah Naufal Zuhdi_Karya.JPG"></image-component>
+                            <image-component src="/../../images/karya/Norita Agustina Subagyo_Karya.JPG"></image-component>
+                            <button class="button chil-button-prev" on-click="showHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                        <div class$="prchilpar {{homeAppClass}}"">
+                            <image-component src="/../../images/karya/Intan Nor Aini_Karya.JPG"></image-component>
+                            <image-component src="/../../images/karya/Lamia Rozianna Putri_Karya.JPG"></image-component>
+                            <button class="button chil-button-next" on-click="prevHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                            <button class="button chil-button-prev" on-click="prevHome2">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                        <div class$="prchilpar {{homeAppClassRe}}"">
+                            <image-component src="/../../images/karya/Livia Citra Atrianda_Karya_Formal.png"></image-component>
+                            <image-component src="/../../images/karya/M ABDUL JABAR_KARYA.JPG"></image-component>
+                            <button class="button chil-button-next" on-click="prevHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    static get properties() {
+        return {
+            homeAppClass: {
+                type: String,
+                value: "hidden"
+            },
+            homeAppClassRe: {
+                type: String,
+                value: "hidden"
+            },
+            travelAppSplashClass: {
+                type: String,
+                value: ""
+            },
+            namaDepartemen: {
+                type: String,
+                value: ''
+            },
+            deskripsiDepartemen: {
+                type: String,
+                value: ''
+            },
+            imageSrc: String,
+        };
+    }
+
+    showHome() {
+        this.homeAppClass = ""; // Menghapus kelas "hidden" pada homeAppClass
+        this.travelAppSplashClass = "hidden"; // Menambahkan kelas "hidden" pada travelAppSplashClass
+        this.homeAppClassRe = "hidden";
+    }
+
+    prevHome() {
+        this.homeAppClass = "hidden"; // Menghapus kelas "hidden" pada homeAppClass
+        this.homeAppClassRe = "hidden";
+        this.travelAppSplashClass = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    prevHome2() {
+        this.homeAppClassRe = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+        this.travelAppSplashClass = "hidden"; // Menghapus kelas "hidden" pada homeAppClass
+        this.homeAppClass = "hidden"; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.modal = this.shadowRoot.getElementById("modal");
+        this.moni = this.shadowRoot.getElementById("moni");
+        this.addEventListener("button-clicked", this.handleButtonClick);
+        // Periksa apakah pengguna sudah mengklik Button 1 sebelumnya
+        const button1Clicked = localStorage.getItem('button1Clicked');
+
+        if (button1Clicked) {
+            // Jika pengguna telah mengklik Button 1 sebelumnya,
+            // langsung tampilkan halaman home-app dan sembunyikan travel-app-splash
+            this.showHome();
+        } else if (button1Clicked) {
+            this.prevHome();
+        } else if (button1Clicked) {
+            this.prevHome2();
+        } else {
+            // Jika pengguna belum mengklik Button 1 sebelumnya,
+            // tampilkan travel-app-splash dan sembunyikan home-app
+            this.showTravelAppSplash();
+        }
+    }
+
+    navigateToLink(event) {
+        const button = event.target;
+        const link = button.getAttribute('data-link');
+        if (link) {
+            window.location.href = link;
+        }
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.removeEventListener("button-clicked", this.handleButtonClick);
+    }
+
+    openModal() {
+        this.modal = this.shadowRoot.getElementById("modal");
+        this.modal.style.display = "block";
+        this.modalStartPosition = 0;
+        this.modal.addEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.addEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.addEventListener("touchend", this.handleTouchEnd.bind(this));
+    }
+
+    handleTouchStart(e) {
+        this.startY = e.touches[0].pageY;
+        this.modalStartPosition = this.modal.getBoundingClientRect().top;
+    }
+
+    handleTouchMove(e) {
+        const deltaY = e.touches[0].pageY - this.startY;
+        this.moveModal(deltaY);
+    }
+
+    handleTouchEnd(e) {
+        const deltaY = e.changedTouches[0].pageY - this.startY;
+        if (deltaY > 100) {
+            this.closeModal();
+        } else {
+            this.resetModalPosition();
+        }
+    }
+
+    moveModal(deltaY) {
+        this.modal.style.transform = `translateY(${deltaY}px)`;
+        this.moni.style.transform = `translateY(${deltaY}px)`
+    }
+
+    resetModalPosition() {
+        this.modal.style.transform = "";
+        this.moni.style.transform = "";
+    }
+
+    closeModal() {
+        this.modal.style.display = "none";
+        this.modal.removeEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.removeEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.removeEventListener("touchend", this.handleTouchEnd.bind(this));
+    }
+
+    handleButtonClick(e) {
+        const button = e.target;
+        console.log("Button clicked:", button.textContent);
+    }
+}
+
+customElements.define('ukmp-departement-karya', DepartementCardKarya)
+
+class DepartementCardPh extends PolymerElement {
+    static get template() {
+        return html`
+          <style>
+          .modal-apps {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+          }
+        
+          .modal-content-apps {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translate(-50%);
+            background-color: #fff;
+            padding: 10px;
+            width: 340px;
+            border-radius: 30px;
+          }
+          .close-button-apps {
+            width: 24px;
+            background-color: transparent;
+            font-size: 18px;
+            color: #999999;
+            cursor: pointer;
+            font-size: 28px;
+            border: none;
+          }
+          
+          .close-button-apps:hover {
+            color: #555555;
+          }
+          </style>
+
+          <div id="Apps" class="modal-apps" on-touchstart="handleTouchStartApp" on-touchmove="handleTouchMoveApp" on-touchend="handleTouchEndApp">
+            <div class="modal-content-apps">
+                <div class="swipe-indicator"></div>
+                <div class="headco-app">
+                    <button class="close-button-apps" on-click="closeApp">&#215;</button>
+                    <ukmp-text class="text-apps" text="Aplikasi UKMP">Aplikasi UKMP</ukmp-text>
+                </div>
+            </div>
+          </div>
+        `;
+    }
+}
+
+customElements.define('ukmp-departement-ph', DepartementCardPh)
+
+class DepartementCardPRD extends PolymerElement {
+    static get template() {
+        return html`
+          <style>
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 999;
+            }
+            
+            .modal-content {
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translate(-50%);
+                background-color: #fff;
+                padding: 10px;
+                width: 85%;
+                border-radius: 20px;
+            }
+            .close-button {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                width: 24px;
+                height: 24px;
+                border: none;
+                background-color: transparent;
+                font-size: 18px;
+                color: #999999;
+                cursor: pointer;
+                font-size: 28px;
+            }
+
+            .headco {
+                display: flex;
+                align-items: center;
+                gap: 5%;
+            }
+
+            .chilpar {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin: 0;
+            }
+
+            .prchilpar {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .button-container{
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin: 20px;
+            }
+
+            .button-container h2 {
+                margin: 0;
+            }
+
+            .button-container h2 {
+                margin: 0;
+                color: #666666;
+            }
+
+            .button-container .list-item {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin: 0;
+            }
+
+            .button-container .list-item image-component{
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+            }
+
+            .modal-button {
+                background-color: #0f0f0f;
+                color: #fff;
+                padding: 10px 0px;
+                border: none;
+                border-radius: 100px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+            }
+
+            .modal-button-li {
+                background-color: #fff;
+                color: #0f0f0f;
+                padding: 10px 0px;
+                border: none;
+                border-radius: 100px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                right: 0
+            }
+            
+            .chil-button-prev {
+                background-color: black;
+                color: #f0f0f0;
+                padding: 5px;
+                border: none;
+                border-radius: 45px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                right: 0;
+                width: 35px;
+            }
+            
+            .chil-button-next {
+                background-color: black;
+                color: #f0f0f0;
+                padding: 5px;
+                border: none;
+                border-radius: 45px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                left: 0;
+                width: 35px;
+            }
+
+            .text-wrapper {
+              font-size: 24px;
+              font-weight: bold;
+              margin-bottom: 10px;
+            }
+            
+            .centered-button {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background-color: transparent;
+                background-image: url("/../../images/dd/DD.jpg");
+                background-repeat: no-repeat;
+                background-size: 50px;
+                border: none;
+            }
+            .hidden {
+                display: none;
+            }
+          </style>
+
+            <div class="profile-picture">
+                <button class="centered-button" on-click="openModal" aria-labelledby="Profile Departement" title="Profile Departement"></button>
+            </div>
+      
+            <div id="modal" class="modal" on-touchstart="handleTouchStart" on-touchmove="handleTouchMove" on-touchend="handleTouchEnd">
+                <div class="modal-content">
+                    <div class="headco">
+                        <button class="close-button" on-click="closeModal">&#215;</button>
+                        <ukmp-text class="text-wrapper">[[namaDepartemen]]</ukmp-text>
+                    </div>
+                    <div class="button-container">
+                        <div class="list-item">
+                            <image-component src="[[imageSrc]]"></image-component>
+                        </div>
+                        <div class="list-item">
+                            <ukmp-text>[[deskripsiDepartemen]]</ukmp-text>
+                            <button class="modal-button" data-link="https://ukmpapps.web.app/hrd" on-click="navigateToLink"><ukmp-text>Ketahui Lebih lanjut</ukmp-text></button>
+                        </div>
+                    </div>
+                    <div class="chilpar">
+                        <div class="headco">
+                            <ukmp-text class="text-wrapper">Anggota PRD</ukmp-text>
+                            <button class="modal-button-li" data-link="https://www.instagram.com/p/Cq1_5bUJbOh/" on-click="navigateToLink"><ukmp-text>Lihat Selengkapnya</ukmp-text></button>
+                        </div>    
+                        <div class$="prchilpar {{travelAppSplashClass}}">
+                            <image-component src="/../../images/prd/Ade yuliana_PRD.HEIC"></image-component>
+                            <image-component src="/../../images/prd/Ema Kartika_PRD.JPG"></image-component>
+                            <button class="button chil-button-prev" on-click="showHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                        <div class$="prchilpar {{homeAppClass}}"">
+                            <image-component src="/../../images/prd/Indah Permata N_PRD.HEIC"></image-component>
+                            <image-component src="/../../images/prd/Muhammad Fuad Hasyim_PRD.JPG"></image-component>
+                            <button class="button chil-button-next" on-click="prevHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                            <button class="button chil-button-prev" on-click="prevHome2">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                        <div class$="prchilpar {{homeAppClassRe}}"">
+                            <image-component src="/../../images/prd/Rizki Nurfauziah_PRD.HEIC"></image-component>
+                            <button class="button chil-button-next" on-click="prevHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    static get properties() {
+        return {
+            homeAppClass: {
+                type: String,
+                value: "hidden"
+            },
+            homeAppClassRe: {
+                type: String,
+                value: "hidden"
+            },
+            travelAppSplashClass: {
+                type: String,
+                value: ""
+            },
+            namaDepartemen: {
+                type: String,
+                value: ''
+            },
+            deskripsiDepartemen: {
+                type: String,
+                value: ''
+            },
+            imageSrc: String,
+        };
+    }
+
+    showHome() {
+        this.homeAppClass = ""; // Menghapus kelas "hidden" pada homeAppClass
+        this.travelAppSplashClass = "hidden"; // Menambahkan kelas "hidden" pada travelAppSplashClass
+        this.homeAppClassRe = "hidden";
+    }
+
+    prevHome() {
+        this.homeAppClass = "hidden"; // Menghapus kelas "hidden" pada homeAppClass
+        this.homeAppClassRe = "hidden";
+        this.travelAppSplashClass = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    prevHome2() {
+        this.homeAppClassRe = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+        this.travelAppSplashClass = "hidden"; // Menghapus kelas "hidden" pada homeAppClass
+        this.homeAppClass = "hidden"; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.modal = this.shadowRoot.getElementById("modal");
+        this.moni = this.shadowRoot.getElementById("moni");
+        this.addEventListener("button-clicked", this.handleButtonClick);
+        // Periksa apakah pengguna sudah mengklik Button 1 sebelumnya
+        const button1Clicked = localStorage.getItem('button1Clicked');
+
+        if (button1Clicked) {
+            // Jika pengguna telah mengklik Button 1 sebelumnya,
+            // langsung tampilkan halaman home-app dan sembunyikan travel-app-splash
+            this.showHome();
+        } else if (button1Clicked) {
+            this.prevHome();
+        } else if (button1Clicked) {
+            this.prevHome2();
+        } else {
+            // Jika pengguna belum mengklik Button 1 sebelumnya,
+            // tampilkan travel-app-splash dan sembunyikan home-app
+            this.showTravelAppSplash();
+        }
+    }
+
+    navigateToLink(event) {
+        const button = event.target;
+        const link = button.getAttribute('data-link');
+        if (link) {
+            window.location.href = link;
+        }
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.removeEventListener("button-clicked", this.handleButtonClick);
+    }
+
+    openModal() {
+        this.modal = this.shadowRoot.getElementById("modal");
+        this.modal.style.display = "block";
+        this.modalStartPosition = 0;
+        this.modal.addEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.addEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.addEventListener("touchend", this.handleTouchEnd.bind(this));
+    }
+
+    handleTouchStart(e) {
+        this.startY = e.touches[0].pageY;
+        this.modalStartPosition = this.modal.getBoundingClientRect().top;
+    }
+
+    handleTouchMove(e) {
+        const deltaY = e.touches[0].pageY - this.startY;
+        this.moveModal(deltaY);
+    }
+
+    handleTouchEnd(e) {
+        const deltaY = e.changedTouches[0].pageY - this.startY;
+        if (deltaY > 100) {
+            this.closeModal();
+        } else {
+            this.resetModalPosition();
+        }
+    }
+
+    moveModal(deltaY) {
+        this.modal.style.transform = `translateY(${deltaY}px)`;
+        this.moni.style.transform = `translateY(${deltaY}px)`
+    }
+
+    resetModalPosition() {
+        this.modal.style.transform = "";
+        this.moni.style.transform = "";
+    }
+
+    closeModal() {
+        this.modal.style.display = "none";
+        this.modal.removeEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.removeEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.removeEventListener("touchend", this.handleTouchEnd.bind(this));
+    }
+
+    handleButtonClick(e) {
+        const button = e.target;
+        console.log("Button clicked:", button.textContent);
+    }
+}
+
+customElements.define('ukmp-departement-prd', DepartementCardPRD)
+
+class DepartementCardRED extends PolymerElement {
+    static get template() {
+        return html`
+          <style>
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 999;
+            }
+            
+            .modal-content {
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translate(-50%);
+                background-color: #fff;
+                padding: 10px;
+                width: 85%;
+                border-radius: 20px;
+            }
+            .close-button {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                width: 24px;
+                height: 24px;
+                border: none;
+                background-color: transparent;
+                font-size: 18px;
+                color: #999999;
+                cursor: pointer;
+                font-size: 28px;
+            }
+
+            .headco {
+                display: flex;
+                align-items: center;
+                gap: 5%;
+            }
+
+            .chilpar {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin: 0;
+            }
+
+            .prchilpar {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .button-container{
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin: 20px;
+            }
+
+            .button-container h2 {
+                margin: 0;
+            }
+
+            .button-container h2 {
+                margin: 0;
+                color: #666666;
+            }
+
+            .button-container .list-item {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin: 0;
+            }
+
+            .button-container .list-item image-component{
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+            }
+
+            .modal-button {
+                background-color: #0f0f0f;
+                color: #fff;
+                padding: 10px 0px;
+                border: none;
+                border-radius: 100px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+            }
+
+            .modal-button-li {
+                background-color: #fff;
+                color: #0f0f0f;
+                padding: 10px 0px;
+                border: none;
+                border-radius: 100px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                right: 0
+            }
+            
+            .chil-button-prev {
+                background-color: black;
+                color: #f0f0f0;
+                padding: 5px;
+                border: none;
+                border-radius: 45px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                right: 0;
+                width: 35px;
+            }
+            
+            .chil-button-next {
+                background-color: black;
+                color: #f0f0f0;
+                padding: 5px;
+                border: none;
+                border-radius: 45px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                left: 0;
+                width: 35px;
+            }
+
+            .text-wrapper {
+              font-size: 24px;
+              font-weight: bold;
+              margin-bottom: 10px;
+            }
+            
+            .centered-button {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background-color: transparent;
+                background-image: url("/../../images/dd/DD.jpg");
+                background-repeat: no-repeat;
+                background-size: 50px;
+                border: none;
+            }
+            .hidden {
+                display: none;
+            }
+          </style>
+
+            <div class="profile-picture">
+                <button class="centered-button" on-click="openModal" aria-labelledby="Profile Departement" title="Profile Departement"></button>
+            </div>
+      
+            <div id="modal" class="modal" on-touchstart="handleTouchStart" on-touchmove="handleTouchMove" on-touchend="handleTouchEnd">
+                <div class="modal-content">
+                    <div class="headco">
+                        <button class="close-button" on-click="closeModal">&#215;</button>
+                        <ukmp-text class="text-wrapper">[[namaDepartemen]]</ukmp-text>
+                    </div>
+                    <div class="button-container">
+                        <div class="list-item">
+                            <image-component src="[[imageSrc]]"></image-component>
+                        </div>
+                        <div class="list-item">
+                            <ukmp-text>[[deskripsiDepartemen]]</ukmp-text>
+                            <button class="modal-button" data-link="https://ukmpapps.web.app/hrd" on-click="navigateToLink"><ukmp-text>Ketahui Lebih lanjut</ukmp-text></button>
+                        </div>
+                    </div>
+                    <div class="chilpar">
+                        <div class="headco">
+                            <ukmp-text class="text-wrapper">Anggota RED</ukmp-text>
+                            <button class="modal-button-li" data-link="https://www.instagram.com/p/Cq1_5bUJbOh/" on-click="navigateToLink"><ukmp-text>Lihat Selengkapnya</ukmp-text></button>
+                        </div>    
+                        <div class$="prchilpar {{travelAppSplashClass}}">
+                            <image-component src="/../../images/red/Dini Sukmawati_RED_Formal.png"></image-component>
+                            <image-component src="/../../images/red/Dita Alinda Restiani_RED.JPG"></image-component>
+                            <button class="button chil-button-prev" on-click="showHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                        <div class$="prchilpar {{homeAppClass}}"">
+                            <image-component src="/../../images/red/Hidayatul Munadhiroh _RED.png"></image-component>
+                            <image-component src="/../../images/red/Putri Dinda Muliana_RED.jpg"></image-component>
+                            <image-component src="/../../images/red/Siti Khotimah_RED_Formal.jpg"></image-component>
+                            <button class="button chil-button-next" on-click="prevHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                            <button class="button chil-button-prev" on-click="prevHome2">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                        <div class$="prchilpar {{homeAppClassRe}}"">
+                            <image-component src="/../../images/red/RED_Widya Indri Hapsari.JPG"></image-component>
+                            <image-component src="/../../images/red/Riska Vitasari _RED.jpg"></image-component>
+                            <button class="button chil-button-next" on-click="prevHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    static get properties() {
+        return {
+            homeAppClass: {
+                type: String,
+                value: "hidden"
+            },
+            homeAppClassRe: {
+                type: String,
+                value: "hidden"
+            },
+            travelAppSplashClass: {
+                type: String,
+                value: ""
+            },
+            namaDepartemen: {
+                type: String,
+                value: ''
+            },
+            deskripsiDepartemen: {
+                type: String,
+                value: ''
+            },
+            imageSrc: String,
+        };
+    }
+
+    showHome() {
+        this.homeAppClass = ""; // Menghapus kelas "hidden" pada homeAppClass
+        this.travelAppSplashClass = "hidden"; // Menambahkan kelas "hidden" pada travelAppSplashClass
+        this.homeAppClassRe = "hidden";
+    }
+
+    prevHome() {
+        this.homeAppClass = "hidden"; // Menghapus kelas "hidden" pada homeAppClass
+        this.homeAppClassRe = "hidden";
+        this.travelAppSplashClass = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    prevHome2() {
+        this.homeAppClassRe = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+        this.travelAppSplashClass = "hidden"; // Menghapus kelas "hidden" pada homeAppClass
+        this.homeAppClass = "hidden"; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.modal = this.shadowRoot.getElementById("modal");
+        this.moni = this.shadowRoot.getElementById("moni");
+        this.addEventListener("button-clicked", this.handleButtonClick);
+        // Periksa apakah pengguna sudah mengklik Button 1 sebelumnya
+        const button1Clicked = localStorage.getItem('button1Clicked');
+
+        if (button1Clicked) {
+            // Jika pengguna telah mengklik Button 1 sebelumnya,
+            // langsung tampilkan halaman home-app dan sembunyikan travel-app-splash
+            this.showHome();
+        } else if (button1Clicked) {
+            this.prevHome();
+        } else if (button1Clicked) {
+            this.prevHome2();
+        } else {
+            // Jika pengguna belum mengklik Button 1 sebelumnya,
+            // tampilkan travel-app-splash dan sembunyikan home-app
+            this.showTravelAppSplash();
+        }
+    }
+
+    navigateToLink(event) {
+        const button = event.target;
+        const link = button.getAttribute('data-link');
+        if (link) {
+            window.location.href = link;
+        }
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.removeEventListener("button-clicked", this.handleButtonClick);
+    }
+
+    openModal() {
+        this.modal = this.shadowRoot.getElementById("modal");
+        this.modal.style.display = "block";
+        this.modalStartPosition = 0;
+        this.modal.addEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.addEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.addEventListener("touchend", this.handleTouchEnd.bind(this));
+    }
+
+    handleTouchStart(e) {
+        this.startY = e.touches[0].pageY;
+        this.modalStartPosition = this.modal.getBoundingClientRect().top;
+    }
+
+    handleTouchMove(e) {
+        const deltaY = e.touches[0].pageY - this.startY;
+        this.moveModal(deltaY);
+    }
+
+    handleTouchEnd(e) {
+        const deltaY = e.changedTouches[0].pageY - this.startY;
+        if (deltaY > 100) {
+            this.closeModal();
+        } else {
+            this.resetModalPosition();
+        }
+    }
+
+    moveModal(deltaY) {
+        this.modal.style.transform = `translateY(${deltaY}px)`;
+        this.moni.style.transform = `translateY(${deltaY}px)`
+    }
+
+    resetModalPosition() {
+        this.modal.style.transform = "";
+        this.moni.style.transform = "";
+    }
+
+    closeModal() {
+        this.modal.style.display = "none";
+        this.modal.removeEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.removeEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.removeEventListener("touchend", this.handleTouchEnd.bind(this));
+    }
+
+    handleButtonClick(e) {
+        const button = e.target;
+        console.log("Button clicked:", button.textContent);
+    }
+}
+
+customElements.define('ukmp-departement-red', DepartementCardRED)
+
+class DepartementCardSTD extends PolymerElement {
+    static get template() {
+        return html`
+          <style>
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 999;
+            }
+            
+            .modal-content {
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translate(-50%);
+                background-color: #fff;
+                padding: 10px;
+                width: 85%;
+                border-radius: 20px;
+            }
+            .close-button {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                width: 24px;
+                height: 24px;
+                border: none;
+                background-color: transparent;
+                font-size: 18px;
+                color: #999999;
+                cursor: pointer;
+                font-size: 28px;
+            }
+
+            .headco {
+                display: flex;
+                align-items: center;
+                gap: 5%;
+            }
+
+            .chilpar {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin: 0;
+            }
+
+            .prchilpar {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .button-container{
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin: 20px;
+            }
+
+            .button-container h2 {
+                margin: 0;
+            }
+
+            .button-container h2 {
+                margin: 0;
+                color: #666666;
+            }
+
+            .button-container .list-item {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin: 0;
+            }
+
+            .button-container .list-item image-component{
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+            }
+
+            .modal-button {
+                background-color: #0f0f0f;
+                color: #fff;
+                padding: 10px 0px;
+                border: none;
+                border-radius: 100px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+            }
+
+            .modal-button-li {
+                background-color: #fff;
+                color: #0f0f0f;
+                padding: 10px 0px;
+                border: none;
+                border-radius: 100px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                right: 0
+            }
+            
+            .chil-button-prev {
+                background-color: black;
+                color: #f0f0f0;
+                padding: 5px;
+                border: none;
+                border-radius: 45px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                right: 0;
+                width: 35px;
+            }
+            
+            .chil-button-next {
+                background-color: black;
+                color: #f0f0f0;
+                padding: 5px;
+                border: none;
+                border-radius: 45px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                margin-right: 10px;
+                position: absolute;
+                left: 0;
+                width: 35px;
+            }
+
+            .text-wrapper {
+              font-size: 24px;
+              font-weight: bold;
+              margin-bottom: 10px;
+            }
+            
+            .centered-button {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background-color: transparent;
+                background-image: url("/../../images/dd/DD.jpg");
+                background-repeat: no-repeat;
+                background-size: 50px;
+                border: none;
+            }
+            .hidden {
+                display: none;
+            }
+          </style>
+
+            <div class="profile-picture">
+                <button class="centered-button" on-click="openModal" aria-labelledby="Profile Departement" title="Profile Departement"></button>
+            </div>
+      
+            <div id="modal" class="modal" on-touchstart="handleTouchStart" on-touchmove="handleTouchMove" on-touchend="handleTouchEnd">
+                <div class="modal-content">
+                    <div class="headco">
+                        <button class="close-button" on-click="closeModal">&#215;</button>
+                        <ukmp-text class="text-wrapper">[[namaDepartemen]]</ukmp-text>
+                    </div>
+                    <div class="button-container">
+                        <div class="list-item">
+                            <image-component src="[[imageSrc]]"></image-component>
+                        </div>
+                        <div class="list-item">
+                            <ukmp-text>[[deskripsiDepartemen]]</ukmp-text>
+                            <button class="modal-button" data-link="https://ukmpapps.web.app/hrd" on-click="navigateToLink"><ukmp-text>Ketahui Lebih lanjut</ukmp-text></button>
+                        </div>
+                    </div>
+                    <div class="chilpar">
+                        <div class="headco">
+                            <ukmp-text class="text-wrapper">Anggota STD</ukmp-text>
+                            <button class="modal-button-li" data-link="https://www.instagram.com/p/Cq1_5bUJbOh/" on-click="navigateToLink"><ukmp-text>Lihat Selengkapnya</ukmp-text></button>
+                        </div>    
+                        <div class$="prchilpar {{travelAppSplashClass}}">
+                            <image-component src="/../../images/std/DWI CAHAYANING A_ STD..JPG"></image-component>
+                            <image-component src="/../../images/std/FATIMATUZZAHRO_STD.JPG"></image-component>
+                            <button class="button chil-button-prev" on-click="showHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                        <div class$="prchilpar {{homeAppClass}}"">
+                            <image-component src="/../../images/std/HANINA HUMAIRA_STD.JPG"></image-component>
+                            <image-component src="/../../images/std/Rismanda Asyifatul A_STD.jpg"></image-component>
+                            <button class="button chil-button-next" on-click="prevHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                            <button class="button chil-button-prev" on-click="prevHome2">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M8.59,16.59L13.17,12L8.59,7.41L10,6l6,6l-6,6L8.59,16.59z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                        <div class$="prchilpar {{homeAppClassRe}}"">
+                            <image-component src="/../../images/std/Wafda Nailal Izza_STD.png"></image-component>
+                            <button class="button chil-button-next" on-click="prevHome">
+                                <svg class="app-switcher-button-icon" version="1.1" id="Layer_1" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" fill="#fff"><path d="M15.41,7.41L10.83,12L15.41,16.59L14,18l-6,-6l6,-6L15.41,7.41z"></path><path fill="none" d="M0,0h24v24H0V0z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    static get properties() {
+        return {
+            homeAppClass: {
+                type: String,
+                value: "hidden"
+            },
+            homeAppClassRe: {
+                type: String,
+                value: "hidden"
+            },
+            travelAppSplashClass: {
+                type: String,
+                value: ""
+            },
+            namaDepartemen: {
+                type: String,
+                value: ''
+            },
+            deskripsiDepartemen: {
+                type: String,
+                value: ''
+            },
+            imageSrc: String,
+        };
+    }
+
+    showHome() {
+        this.homeAppClass = ""; // Menghapus kelas "hidden" pada homeAppClass
+        this.travelAppSplashClass = "hidden"; // Menambahkan kelas "hidden" pada travelAppSplashClass
+        this.homeAppClassRe = "hidden";
+    }
+
+    prevHome() {
+        this.homeAppClass = "hidden"; // Menghapus kelas "hidden" pada homeAppClass
+        this.homeAppClassRe = "hidden";
+        this.travelAppSplashClass = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    prevHome2() {
+        this.homeAppClassRe = ""; // Menambahkan kelas "hidden" pada travelAppSplashClass
+        this.travelAppSplashClass = "hidden"; // Menghapus kelas "hidden" pada homeAppClass
+        this.homeAppClass = "hidden"; // Menambahkan kelas "hidden" pada travelAppSplashClass
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.modal = this.shadowRoot.getElementById("modal");
+        this.moni = this.shadowRoot.getElementById("moni");
+        this.addEventListener("button-clicked", this.handleButtonClick);
+        // Periksa apakah pengguna sudah mengklik Button 1 sebelumnya
+        const button1Clicked = localStorage.getItem('button1Clicked');
+
+        if (button1Clicked) {
+            // Jika pengguna telah mengklik Button 1 sebelumnya,
+            // langsung tampilkan halaman home-app dan sembunyikan travel-app-splash
+            this.showHome();
+        } else if (button1Clicked) {
+            this.prevHome();
+        } else if (button1Clicked) {
+            this.prevHome2();
+        } else {
+            // Jika pengguna belum mengklik Button 1 sebelumnya,
+            // tampilkan travel-app-splash dan sembunyikan home-app
+            this.showTravelAppSplash();
+        }
+    }
+
+    navigateToLink(event) {
+        const button = event.target;
+        const link = button.getAttribute('data-link');
+        if (link) {
+            window.location.href = link;
+        }
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.removeEventListener("button-clicked", this.handleButtonClick);
+    }
+
+    openModal() {
+        this.modal = this.shadowRoot.getElementById("modal");
+        this.modal.style.display = "block";
+        this.modalStartPosition = 0;
+        this.modal.addEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.addEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.addEventListener("touchend", this.handleTouchEnd.bind(this));
+    }
+
+    handleTouchStart(e) {
+        this.startY = e.touches[0].pageY;
+        this.modalStartPosition = this.modal.getBoundingClientRect().top;
+    }
+
+    handleTouchMove(e) {
+        const deltaY = e.touches[0].pageY - this.startY;
+        this.moveModal(deltaY);
+    }
+
+    handleTouchEnd(e) {
+        const deltaY = e.changedTouches[0].pageY - this.startY;
+        if (deltaY > 100) {
+            this.closeModal();
+        } else {
+            this.resetModalPosition();
+        }
+    }
+
+    moveModal(deltaY) {
+        this.modal.style.transform = `translateY(${deltaY}px)`;
+        this.moni.style.transform = `translateY(${deltaY}px)`
+    }
+
+    resetModalPosition() {
+        this.modal.style.transform = "";
+        this.moni.style.transform = "";
+    }
+
+    closeModal() {
+        this.modal.style.display = "none";
+        this.modal.removeEventListener("touchstart", this.handleTouchStart.bind(this));
+        this.modal.removeEventListener("touchmove", this.handleTouchMove.bind(this));
+        this.modal.removeEventListener("touchend", this.handleTouchEnd.bind(this));
+    }
+
+    handleButtonClick(e) {
+        const button = e.target;
+        console.log("Button clicked:", button.textContent);
+    }
+}
+
+customElements.define('ukmp-departement-std', DepartementCardSTD)
+
+class Polymap extends PolymerElement {
+    static get template() {
+        return html`
+        <style>
+            iframe {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                border: 0;
+            }
+        </style>
+
+        <iframe width="100%" height="100%" frameborder="0" src="[[imageSrc]]"></iframe>
+    `;
+    }
+    static get properties() {
+        return {
+            imageSrc: String,
+        };
+    }
+}
+
+customElements.define('ukmp-map', Polymap);
+
+class Carousel extends PolymerElement {
+    static get template() {
+        return html`
+      <style>
+      :host {
+        display: block;
+        position: relative;
+        width: 100%;
+        bottom: 0;
+        overflow: hidden;
+      }
+
+      #carousel {
+        display: flex;
+        width: 100%;
+        transform: translateX(-0%);
+        transition: transform 0.3s ease;
+        position: fixed;
+        bottom: 5%;
+      }
+
+      .carousel-item {
+        flex: 0 0 32.2%;
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f1f1f1;
+        color: #333;
+        font-size: 24px;
+        margin-right: 10px; /* Menambahkan jarak antara slide */
+        border-radius: 10px; /* Menambahkan border-radius */
+      }
+
+      .carousel-item:last-child {
+        margin-left: 6px; /* Menghapus margin-right pada slide terakhir */
+      }
+      .content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      
+      .image {
+        flex: 1;
+        text-align: right;
+        margin-right: 20px;
+      }
+      
+      .image img {
+        max-width: 100%;
+        height: auto;
+      }
+      
+      .text {
+        flex: 1;
+        text-align: left;
+      }
+      
+      .text h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+      
+      .text p {
+        font-size: 16px;
+        margin-bottom: 20px;
+      }
+      
+      .text button {
+        padding: 10px 20px;
+        font-size: 16px;
+      }
+
+      .modal-button {
+        background-color: black;
+        color: #f0f0f0;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 45px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-right: 10px;
+      }
+
+      .modal-button:hover {
+        background-color: #ede3e3;
+        color: black;
+      }
+      </style>
+
+      <div id="carousel" class="carousel">
+        <div class="carousel-item">
+            <div class="content">
+                <div class="image">
+                    <image-component src="/../../images/day1/IMG_0052.JPG" alt="Gambar 1"></image-component>
+                </div>
+                <div class="text">
+                    <h1><ukmp-text>Day 1</ukmp-text></h1>
+                    <p><ukmp-text>Upgrading 2023</ukmp-text></p>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">            
+            <div class="content">
+                <div class="image">
+                    <image-component src="/../../images/day2/IMG_0217.JPG" alt="Gambar 1"></image-component>
+                </div>
+                <div class="text">
+                    <h1><ukmp-text>Day 2</ukmp-text></h1>
+                    <p><ukmp-text>Upgrading 2023</ukmp-text></p>
+                </div>
+            </div>
+        </div>
+      </div>
+    `;
+    }
+
+    static get is() {
+        return 'carousel-component';
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.initializeCarousel();
+    }
+    navigateToLink(event) {
+        const button = event.target;
+        const link = button.getAttribute('data-link');
+        if (link) {
+            window.location.href = link;
+        }
+    }
+
+    initializeCarousel() {
+        const carousel = this.shadowRoot.getElementById('carousel');
+        const carouselItems = carousel.getElementsByClassName('carousel-item');
+        const numItems = carouselItems.length;
+        const itemWidthPercentage = 100 / numItems;
+
+        carousel.style.width = `${numItems * 100}%`;
+
+        Array.from(carouselItems).forEach((item) => {
+            item.style.width = `${itemWidthPercentage}%`;
+        });
+
+        let currentItem = 0;
+
+        setInterval(() => {
+            currentItem = (currentItem + 1) % numItems;
+            const translateX = `-${currentItem * itemWidthPercentage}%`;
+            carousel.style.transform = `translateX(${translateX})`;
+        }, 3000);
+    }
+}
+
+customElements.define(Carousel.is, Carousel);
+
+class UkmpLoad extends PolymerElement {
+    static get template() {
+        return html`
+      <style>
+      html, body {
+        overflow: hidden;
+      }
+      :host {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-image: url('../logo/ukmp-logo-512x512.png');
+        background-repeat: no-repeat;
+        background-position: center;
+        background-color: #fff;
+        z-index: 9999;
+        overflow: hidden;
+      }
+      @media (prefers-color-scheme: dark) {
+        :host {
+          background-color: #161b22;
+          background-image: url('../logo/ukmp-logo-512x512-white.png');
+          color: #f4f4f4;
+          overflow: hidden;
+        }
+      }         
+      </style>
+      <slot></slot>
+    `
+    }
+}
+customElements.define("ukmp-load", UkmpLoad);
