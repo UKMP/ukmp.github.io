@@ -1,4 +1,4 @@
-import { PolymerElement, html } from "node_modules/@polymer/polymer/polymer-element.js";
+import { PolymerElement, html } from "/ukmp.github.io/node_modules/@polymer/polymer/polymer-element.js";
 
 const ukmpApp = document.createElement("ukmp-app");
 document.body.appendChild(ukmpApp);
